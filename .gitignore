@@ -1,4 +1,6 @@
+# Local environment files
 .vscode/
+*.env/
 
 # Ignoring the build files for latex
 report/*.aux
