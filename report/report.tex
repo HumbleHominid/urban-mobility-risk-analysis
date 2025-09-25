@@ -1,0 +1,77 @@
+\documentclass[10pt,a4paper]{article} %
+
+% Essential + Custom style packages
+\usepackage[margin=1in]{geometry}        % margins suitable for one page
+\usepackage{graphicx}                    % include figures
+\usepackage{amsmath,amsfonts,amssymb}    % math symbols and fonts
+\usepackage{dcolumn}                     % align table columns on decimal point
+\usepackage[breaklinks=true,hidelinks,colorlinks=true,linkcolor=tabblue,citecolor=tabblue,urlcolor=tabblue]{hyperref}
+\usepackage{enumitem}                    % control over lists
+
+% For compiling
+\usepackage{bookmark}
+% Custom colors and formatting
+\usepackage{color}
+
+% Header and footer settings
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lhead{\footnotesize Introduction to Data Analytics in Business}
+\chead{\footnotesize Project Name}
+\rhead{\footnotesize \today}
+\cfoot{}
+
+% Line and paragraph spacing
+\setlength{\parindent}{0pt}
+\hfuzz=1pt
+\vfuzz=1pt
+
+\begin{document}
+
+%% Title and Highlight
+\begin{center}
+    {\large\bfseries TITLE (max.\ 30 chars)}\\[0.5em]
+    {\small Author 1, Author 2, and Author 3}\\[1em]
+    {\small One or two highlight/summary sentences (max. 300 chars)}
+\end{center}
+
+%% Description: Background & Results
+\paragraph{Background}
+% Brief context and motivation (up to ~1000 chars)
+
+\paragraph{Results}
+% Key findings and insights (up to ~2000 chars)
+% Multiple figures can be added as links / references. 
+% My recommendation is to only add maximally one figure directly in the PDF.
+
+%% References
+\paragraph{References}
+\begin{enumerate}[label={[\arabic*]}]
+    \item DOI or URL for paper/persistent reference
+          % add more items as needed
+\end{enumerate}
+
+%% Code
+\paragraph{Code}
+\begin{enumerate}[label={[\arabic*]}]
+    \item DOI or URL for code repository/notebook
+          % add more items as needed
+\end{enumerate}
+
+%% Data
+\paragraph{Data}
+\begin{enumerate}[label={[\arabic*]}]
+    \item DOI or URL for dataset
+          % add more items as needed
+\end{enumerate}
+
+%% Protocols
+\paragraph{Protocols}
+\begin{enumerate}[label={[\arabic*]}]
+    \item DOI or URL for experimental or analysis protocol
+          % add more items as needed
+\end{enumerate}
+
+\end{document}
