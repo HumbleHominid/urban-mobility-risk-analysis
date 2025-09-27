@@ -3,20 +3,10 @@ channels:
   - defaults
 dependencies:
   - python=3.13.5
-  - conda=25.7.0
-  - setuptools
-  - pip
-  - wheel
-  - conda-anaconda-telemetry[version='>=0.2.0']
-  - conda-anaconda-tos[version='>=0.2.1']
-  - conda-content-trust
-  - conda-libmamba-solver
-  - menuinst
-  - anaconda_prompt
-  - anaconda_powershell_prompt
-  - anaconda-anon-usage
-  - ipykernel
   - numpy
   - matplotlib
   - pandas
   - altair
+  - geopandas
+  - seaborn
+  - scikit-learn
