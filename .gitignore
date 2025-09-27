@@ -9,5 +9,8 @@ report/*.log
 report/*.out
 report/*.gz
 
-src/data/
 *__pycache__/
+
+# Ignore files in src/data that are not pdf files
+src/data/*
+!src/data/*.pdf
