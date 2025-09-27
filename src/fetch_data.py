@@ -57,7 +57,6 @@ def extract_zip(extract_path: str, file_path: str):
     Args:
         extract_path (str): The path to extract the zip file to.
         file_path (str): The path of the zip file to extract.
-        data_title (str): The title of the dataset (for logging purposes).
     """
     file_name = os.path.basename(file_path)[:-4]
     if not os.path.exists(extract_path):
