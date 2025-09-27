@@ -112,6 +112,5 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
     return {year: get_df(year) for year in years}
 
 
-"test"
 if __name__ == "__main__":
     fetch_traffic_data()
