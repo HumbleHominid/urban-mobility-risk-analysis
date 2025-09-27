@@ -8,3 +8,6 @@ report/*.aux
 report/*.log
 report/*.out
 report/*.gz
+
+src/data/
+*__pycache__/
