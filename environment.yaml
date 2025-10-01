@@ -10,3 +10,4 @@ dependencies:
   - geopandas
   - seaborn
   - scikit-learn
+  - ipykernel
