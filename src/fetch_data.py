@@ -96,8 +96,9 @@ def get_df(year: int) -> pd.DataFrame:
 
     path = os.path.join(DATA_DIR, f"{year}.csv")
     df = pd.read_csv(  # type: ignore
-        path, sep=";", decimal=",", dtype={"UIDENTSTLAE": str, "UIDENTSTLA": str}
+        path, sep=";", decimal=",", dtype={"UIDENTSTLAE": str, "UIDENTSTLA": str, "UGEMEINDE": str, "ULAND": str, "UREGBEZ": str, "UKREIS": str}
     )
+    df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
     return df
 
 
