@@ -96,9 +96,55 @@ def get_df(year: int) -> pd.DataFrame:
 
     path = os.path.join(DATA_DIR, f"{year}.csv")
     df = pd.read_csv(  # type: ignore
-        path, sep=";", decimal=",", dtype={"UIDENTSTLAE": str, "UIDENTSTLA": str, "UGEMEINDE": str, "ULAND": str, "UREGBEZ": str, "UKREIS": str}
+        path,
+        sep=";",
+        decimal=",",
+        dtype={
+            "UIDENTSTLAE": str,
+            "UIDENTSTLA": str,
+            "UGEMEINDE": str,
+            "ULAND": str,
+            "UREGBEZ": str,
+            "UKREIS": str,
+        },
     )
+
+    # Create a community key column. This is how we can identify cities
     df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
+
+    # We drop columns for identifiers that we don't care about for analysis
+    if "UIDENTSTLAE" in df.columns:
+        df.drop("UIDENTSTLAE", axis=1, inplace=True)
+    elif "UIDENTSTLA" in df.columns:
+        df.drop("UIDENTSTLA", axis=1, inplace=True)
+
+    if "FID" in df.columns:
+        df.drop("FID", axis=1, inplace=True)
+
+    if "PLST" in df.columns:
+        df.drop("PLST", axis=1, inplace=True)
+
+    # Rename columns to have consistent naming across years
+    df.rename(
+        columns={
+            # Accident with other
+            "IstSonstig": "IstSonstige",
+            # Road Surface Condition
+            "STRZUSTAND": "USTRZUSTAND",
+            "IstStrasse": "USTRZUSTAND",
+            "IstStrassenzustand": "USTRZUSTAND",
+            # Light Condition
+            "LICHT": "ULICHTVERH",
+            # IDs
+            "OBJECTID": "OID_",
+            "OBJECTID_1": "OID_",
+        },
+        inplace=True,
+    )
+
+    # Create a unique id for the entry based on year and OID_
+    df["OID_"] = df["OID_"].apply(lambda x: f"{year}_{x}")  # type: ignore
+
     return df
 
 
