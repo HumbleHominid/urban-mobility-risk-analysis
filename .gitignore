@@ -14,3 +14,4 @@ report/*.gz
 # Ignore files in src/data that are not pdf files
 src/data/*
 !src/data/*.pdf
+!src/data/city_info.csv
