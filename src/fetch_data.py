@@ -143,7 +143,7 @@ def get_df(year: int) -> pd.DataFrame:
     )
 
     # Create a unique id for the entry based on year and OID_
-    df["OID_"] = df["OID_"].apply(lambda x: f"{year}_{x}")  # type: ignore
+    df["UID"] = df["OID_"].apply(lambda x: f"{year}_{x}")  # type: ignore
 
     return df
 
@@ -159,5 +159,42 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
     return {year: get_df(year) for year in years}
 
 
+def get_city_info() -> pd.DataFrame:
+    """Fetches the city info from disk.
+
+    Returns:
+        pd.DataFrame: The city info as a Pandas dataframe
+    """
+    path = os.path.join(DATA_DIR, "city_info.csv")
+    df = pd.read_csv(  # type: ignore
+        path,
+        sep=";",
+        dtype={
+            "city": str,
+            "area in sq km": float,
+            "population": int,
+        },
+        converters={"regional key": lambda x: str(x)[:5] + str(x)[9:]},
+    )
+
+    return df
+
+
+def get_regional_key(df: pd.DataFrame, city_name: str) -> str:
+    """Fetches the regional key for the specified city from a dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing city info.
+        city_name (str): The name of the city to get the regional key for.
+
+    Returns:
+        str: The regional key for the specified city.
+    """
+    city_info = df[df["city"] == city_name]
+    return city_info["regional key"].values[0]
+
+
 if __name__ == "__main__":
     fetch_traffic_data()
+    city_info = get_city_info()
+    print(city_info.head())
