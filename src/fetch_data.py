@@ -171,11 +171,12 @@ def get_city_info() -> pd.DataFrame:
         sep=";",
         dtype={
             "city": str,
-            "area in sq km": float,
+            "area in km²": float,
             "population": int,
         },
         converters={"regional key": lambda x: str(x)[:5] + str(x)[9:]},
     )
+    df.rename(columns={"area in km²": "sq km"}, inplace=True)
 
     return df
 
