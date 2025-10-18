@@ -112,6 +112,10 @@ def get_df(year: int) -> pd.DataFrame:
     # Create a community key column. This is how we can identify cities
     df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
 
+    states = ["11", "02"]
+    for s in states:
+        df.loc[df["ULAND"] == s, "Community_key"] = f"{s}000000"
+
     # We drop columns for identifiers that we don't care about for analysis
     if "UIDENTSTLAE" in df.columns:
         df.drop("UIDENTSTLAE", axis=1, inplace=True)
@@ -171,11 +175,12 @@ def get_city_info() -> pd.DataFrame:
         sep=";",
         dtype={
             "city": str,
-            "area in sq km": float,
+            "area in km²": float,
             "population": int,
         },
         converters={"regional key": lambda x: str(x)[:5] + str(x)[9:]},
     )
+    df.rename(columns={"area in km²": "sq km"}, inplace=True)
 
     return df
 
@@ -196,5 +201,7 @@ def get_regional_key(df: pd.DataFrame, city_name: str) -> str:
 
 if __name__ == "__main__":
     fetch_traffic_data()
+    df = get_df(2024)
     city_info = get_city_info()
-    print(city_info.head())
+    berlin_key = get_regional_key(city_info, "Berlin")
+    print(df[df["Community_key"] == berlin_key].head())
