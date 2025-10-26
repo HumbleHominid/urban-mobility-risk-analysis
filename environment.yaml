@@ -12,3 +12,5 @@ dependencies:
   - scikit-learn
   - ipykernel
   - vl-convert-python
+  - contextily
+  - folium
