@@ -11,7 +11,8 @@
 % For compiling
 \usepackage{bookmark}
 % Custom colors and formatting
-\usepackage{color}
+\usepackage{xcolor}
+\definecolor{tabblue}{HTML}{0066CC}
 
 % Header and footer settings
 \usepackage{fancyhdr}
@@ -41,51 +42,42 @@
 % How are traffic accidents with personal injury distributed in Frankfurt am Main?
 
 %% Description: Background & Results
-\paragraph{Background}
+\section*{Background}
 % Brief context and motivation (up to ~1000 chars)
 
-\paragraph{Results}
+\section*{Results}
 % Key findings and insights (up to ~2000 chars)
 % Multiple figures can be added as links / references. 
 % My recommendation is to only add maximally one figure directly in the PDF.
 
 %% References
-\paragraph{References}
+\section*{References}
 \begin{enumerate}[label={[\arabic*]}]
-    \item DOI or URL for paper/persistent reference
-          % add more items as needed
-          % Point Pattern Analysis - https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html
-          % Data license Germany – Attribution – Version 2.0 - http://www.govdata.de/dl-de/by-2-0
-          % Unfallatlas 2016 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2016_EPSG25832_CSV.zip
-          % Unfallatlas 2017 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2017_EPSG25832_CSV.zip
-          % Unfallatlas 2018 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2018_EPSG25832_CSV.zip
-          % Unfallatlas 2019 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2019_EPSG25832_CSV.zip
-          % Unfallatlas 2020 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2020_EPSG25832_CSV.zip
-          % Unfallatlas 2021 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2021_EPSG25832_CSV.zip
-          % Unfallatlas 2022 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2022_EPSG25832_CSV.zip
-          % Unfallatlas 2023 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2023_EPSG25832_CSV.zip
-          % Unfallatlas 2024 - https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip
+    % add more items as needed
+    \item Sergio J. Rey, Dani Arribas-Bel, Levi J. Wolf, ``Point Pattern Analysis'', 2020. [Online]. Available: \url{https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html}. [Accessed October 26, 2025]
+    \item ``Data license Germany---Attribution---Version 2.0''. [Online]. Available: \url{http://www.govdata.de/dl-de/by-2-0}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
 %% Code
-\paragraph{Code}
-\begin{enumerate}[label={[\arabic*]}]
-    \item DOI or URL for code repository/notebook
-          % add more items as needed
+\section*{Code}
+\begin{enumerate}[label={[\arabic*]},start=3]
+    \item Adrian Frings, Gaziza Janabayeva, Michael Fryer, ``Urban Mobility Risk Analysis'', 2025. [Online]. Available: \url{https://github.com/HumbleHominid/urban-mobility-risk-analysis}
 \end{enumerate}
 
 %% Data
-\paragraph{Data}
-\begin{enumerate}[label={[\arabic*]}]
-    \item DOI or URL for dataset
-          % add more items as needed
+\section*{Data}
+\begin{enumerate}[label={[\arabic*]},start=4]
+    % add more items as needed
+    \item ``OpenGeodata.NRW''. [Online]. Available: \url{https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/}. [Accessed October 26, 2025]
+    \item Statistisches Bundesamt (Destatis), ``Accidents (recorded by the police): Germany, years, accident category, area'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0001}. [Accessed October 26, 2025] % chktex 8
+    \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
 %% Protocols
-\paragraph{Protocols}
-\begin{enumerate}[label={[\arabic*]}]
-    \item DOI or URL for experimental or analysis protocol
-          % add more items as needed
-\end{enumerate}
+% \section*{Protocols}
+% \begin{enumerate}[label={[\arabic*]}]
+%     \item DOI or URL for experimental or analysis protocol
+%           % add more items as needed
+% \end{enumerate}
 
 \end{document}
