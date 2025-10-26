@@ -7,6 +7,7 @@
 \usepackage{dcolumn}                     % align table columns on decimal point
 \usepackage[breaklinks=true,hidelinks,colorlinks=true,linkcolor=tabblue,citecolor=tabblue,urlcolor=tabblue]{hyperref}
 \usepackage{enumitem}                    % control over lists
+\usepackage{wrapfig}                     % wrap text around figures
 
 % For compiling
 \usepackage{bookmark}
@@ -44,6 +45,16 @@
 %% Description: Background & Results
 \section*{Background}
 % Brief context and motivation (up to ~1000 chars)
+\begin{wrapfigure}{r}{0.3\textwidth}
+    \centering
+    \vspace{0pt}
+    \includegraphics[width=0.28\textwidth]{../src/img/de-2024-bw.png}
+    \caption{Traffic accidents with personal injury (2024).}
+    \vspace{-50pt}
+\end{wrapfigure}
+
+Traffic accidents are a major public health concern. Every year in Germany there is an average of 2,500,000 traffic accidents.[1] Of those accidents, roughly 11\% or, one in nine, results in personal injury.[1,2] In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This analysis aims to map and analyze the distribution of such accidents in Frankfurt am Main.
+
 
 \section*{Results}
 % Key findings and insights (up to ~2000 chars)
@@ -53,24 +64,23 @@
 %% References
 \section*{References}
 \begin{enumerate}[label={[\arabic*]}]
-    % add more items as needed
+    \item Statistisches Bundesamt (Destatis), ``Accidents (recorded by the police): Germany, years, accident category, area'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0001}. [Accessed October 26, 2025] % chktex 8
+    \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
     \item Sergio J. Rey, Dani Arribas-Bel, Levi J. Wolf, ``Point Pattern Analysis'', 2020. [Online]. Available: \url{https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html}. [Accessed October 26, 2025]
     \item ``Data license Germany---Attribution---Version 2.0''. [Online]. Available: \url{http://www.govdata.de/dl-de/by-2-0}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
 %% Code
 \section*{Code}
-\begin{enumerate}[label={[\arabic*]},start=3]
+\begin{enumerate}[label={[\arabic*]},start=5]
     \item Adrian Frings, Gaziza Janabayeva, Michael Fryer, ``Urban Mobility Risk Analysis'', 2025. [Online]. Available: \url{https://github.com/HumbleHominid/urban-mobility-risk-analysis}
 \end{enumerate}
 
 %% Data
 \section*{Data}
-\begin{enumerate}[label={[\arabic*]},start=4]
+\begin{enumerate}[label={[\arabic*]},start=6]
     % add more items as needed
     \item ``OpenGeodata.NRW''. [Online]. Available: \url{https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/}. [Accessed October 26, 2025]
-    \item Statistisches Bundesamt (Destatis), ``Accidents (recorded by the police): Germany, years, accident category, area'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0001}. [Accessed October 26, 2025] % chktex 8
-    \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
 %% Protocols
