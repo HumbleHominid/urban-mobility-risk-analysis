@@ -11,5 +11,6 @@ dependencies:
   - seaborn
   - scikit-learn
   - ipykernel
+  - vl-convert-python
   - contextily
   - folium
