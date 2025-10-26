@@ -12,6 +12,4 @@ report/*.gz
 *__pycache__/
 
 # Ignore files in src/data that are not pdf files
-src/data/*
-!src/data/*.pdf
-!src/data/city_info.csv
+src/data/[0-9]*.csv
