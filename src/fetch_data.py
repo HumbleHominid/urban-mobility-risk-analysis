@@ -109,7 +109,6 @@ def get_df(year: int) -> pd.DataFrame:
             "ULAND": str,
             "UREGBEZ": str,
             "UKREIS": str,
-            "UMONAT": str,
         },
     )
 
@@ -131,9 +130,6 @@ def get_df(year: int) -> pd.DataFrame:
 
     if "PLST" in df.columns:
         df.drop("PLST", axis=1, inplace=True)
-
-    # Replace months with preceding 0 if they are a single digit
-    df["UMONAT"] = df["UMONAT"].apply(lambda x: f"{int(x):02d}")  # type: ignore
 
     # Rename columns to have consistent naming across years
     df.rename(
