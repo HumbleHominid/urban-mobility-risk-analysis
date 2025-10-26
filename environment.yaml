@@ -11,3 +11,5 @@ dependencies:
   - seaborn
   - scikit-learn
   - ipykernel
+  - contextily
+  - folium
