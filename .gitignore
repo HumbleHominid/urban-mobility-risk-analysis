@@ -11,5 +11,7 @@ report/*.gz
 
 *__pycache__/
 
-# Ignore files in src/data that are not pdf files
+# Ignore the downloaded csv files in src/data
 src/data/[0-9]*.csv
+# Ignore the Destatis xlsx files
+src/data/46241*.xlsx
