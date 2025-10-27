@@ -13,3 +13,4 @@ report/*.gz
 
 # Ignore files in src/data that are not pdf files
 src/data/[0-9]*.csv
+*.DS_Store
