@@ -2,15 +2,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.13.5
+  - python=3.13
   - numpy
   - matplotlib
   - pandas
   - altair
   - geopandas
   - seaborn
-  - scikit-learn
   - ipykernel
   - vl-convert-python
   - contextily
-  - folium
+  - manim
