@@ -15,3 +15,8 @@ report/*.gz
 src/data/[0-9]*.csv
 # Ignore the Destatis xlsx files
 src/data/46241*.xlsx
+
+# Ignore everything in src/media that isn't in a subdirectory of src/media/videos
+src/media/*
+!src/media/videos/
+src/media/videos/**/partial_movie_files/
