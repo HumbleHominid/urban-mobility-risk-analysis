@@ -93,11 +93,65 @@ def get_df(year: int) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The dataframe for the specified year.
     """
+    assert year in DATA_YEARS, (
+        f"Year {year} not in available data years {list(DATA_YEARS)}"
+    )
 
     path = os.path.join(DATA_DIR, f"{year}.csv")
     df = pd.read_csv(  # type: ignore
-        path, sep=";", decimal=",", dtype={"UIDENTSTLAE": str, "UIDENTSTLA": str}
+        path,
+        sep=";",
+        decimal=",",
+        dtype={
+            "UIDENTSTLAE": str,
+            "UIDENTSTLA": str,
+            "UGEMEINDE": str,
+            "ULAND": str,
+            "UREGBEZ": str,
+            "UKREIS": str,
+        },
     )
+
+    # Create a community key column. This is how we can identify cities
+    df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
+
+    states = ["11", "02"]
+    for s in states:
+        df.loc[df["ULAND"] == s, "Community_key"] = f"{s}000000"
+
+    # We drop columns for identifiers that we don't care about for analysis
+    if "UIDENTSTLAE" in df.columns:
+        df.drop("UIDENTSTLAE", axis=1, inplace=True)
+    elif "UIDENTSTLA" in df.columns:
+        df.drop("UIDENTSTLA", axis=1, inplace=True)
+
+    if "FID" in df.columns:
+        df.drop("FID", axis=1, inplace=True)
+
+    if "PLST" in df.columns:
+        df.drop("PLST", axis=1, inplace=True)
+
+    # Rename columns to have consistent naming across years
+    df.rename(
+        columns={
+            # Accident with other
+            "IstSonstig": "IstSonstige",
+            # Road Surface Condition
+            "STRZUSTAND": "USTRZUSTAND",
+            "IstStrasse": "USTRZUSTAND",
+            "IstStrassenzustand": "USTRZUSTAND",
+            # Light Condition
+            "LICHT": "ULICHTVERH",
+            # IDs
+            "OBJECTID": "OID_",
+            "OBJECTID_1": "OID_",
+        },
+        inplace=True,
+    )
+
+    # Create a unique id for the entry based on year and OID_
+    df["UID"] = df["OID_"].apply(lambda x: f"{year}_{x}")  # type: ignore
+
     return df
 
 
@@ -109,8 +163,51 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
     Returns:
         dict[int, pd.DataFrame]: A dictionary mapping years to their dataframes.
     """
+    assert all(year in DATA_YEARS for year in years), (
+        f"Some years not in available data years {list(DATA_YEARS)}"
+    )
     return {year: get_df(year) for year in years}
+
+
+def get_city_info() -> pd.DataFrame:
+    """Fetches the city info from disk.
+
+    Returns:
+        pd.DataFrame: The city info as a Pandas dataframe
+    """
+    path = os.path.join(DATA_DIR, "city_info.csv")
+    df = pd.read_csv(  # type: ignore
+        path,
+        sep=";",
+        dtype={
+            "city": str,
+            "area in km²": float,
+            "population": int,
+        },
+        converters={"regional key": lambda x: str(x)[:5] + str(x)[9:]},
+    )
+    df.rename(columns={"area in km²": "sq km"}, inplace=True)
+
+    return df
+
+
+def get_regional_key(df: pd.DataFrame, city_name: str) -> str:
+    """Fetches the regional key for the specified city from a dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing city info.
+        city_name (str): The name of the city to get the regional key for.
+
+    Returns:
+        str: The regional key for the specified city.
+    """
+    city_info = df[df["city"] == city_name]
+    return city_info["regional key"].values[0]
 
 
 if __name__ == "__main__":
     fetch_traffic_data()
+    df = get_df(2024)
+    city_info = get_city_info()
+    berlin_key = get_regional_key(city_info, "Berlin")
+    print(df[df["Community_key"] == berlin_key].head())
