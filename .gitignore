@@ -13,9 +13,11 @@ report/*.gz
 
 # Ignore files in src/data that are not pdf files
 src/data/[0-9]*.csv
-src/data/46241*.xlsx
 
 # Ignore everything in src/media that isn't in a subdirectory of src/media/videos
 src/media/*
 !src/media/videos/
 src/media/videos/**/partial_movie_files/
+
+# Ignore MAC files
+*.DS_Store
