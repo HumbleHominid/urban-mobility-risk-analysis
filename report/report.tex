@@ -9,6 +9,8 @@
 \usepackage{enumitem}                    % control over lists
 \usepackage{wrapfig}                     % wrap text around figures
 
+\usepackage{lipsum} % TODO remove
+
 % For compiling
 \usepackage{bookmark}
 % Custom colors and formatting
@@ -31,10 +33,10 @@
 \vfuzz=1pt
 
 \begin{document}
-
+% Spatial Analysis of Traffic Accidents in Frankfurt am Main
 %% Title and Highlight
 \begin{center}
-    {\large\bfseries TITLE (max.\ 30 chars)}\\[0.5em]
+    {\large\bfseries Spatial Analysis of Traffic Accidents in Frankfurt am Main}\\[0.5em]
     {\small Adrian Frings, Gaziza Janabayeva, Michael Fryer}\\[1em]
     {\small In this paper we analyze the spatial distribution of traffic accidents with personal injury in Frankfurt am Main. Understanding these patterns can help identify high-risk areas and inform targeted interventions to improve road safety.}
 \end{center}
@@ -50,16 +52,23 @@
     \vspace{0pt}
     \includegraphics[width=0.28\textwidth]{../src/img/de-2024-bw.png}
     \caption{Traffic accidents with personal injury (2024).}
-    \vspace{-50pt}
+    \vspace{-30pt}
 \end{wrapfigure}
 
-Traffic accidents are a major public health concern. Every year in Germany there is an average of 2,500,000 traffic accidents.[1] Of those accidents, roughly 11\% or, one in nine, results in personal injury.[1,2] In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This analysis aims to map and analyze the distribution of such accidents in Frankfurt am Main.
+Traffic accidents are a major public health concern. Every year in Germany there is an average of 2,500,000 traffic accidents.[1] Of those accidents, roughly 11\% or, one in nine, results in personal injury.[1,2] In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This paper maps and analyzes the distribution of such accidents in Frankfurt am Main.
 
+\section*{Data \& Methods}
+We will analyze data obtained from Unfallatlas which contains records of accidents with personal injury in Germany. While we have access to data from 2016, some states are not included until later years e.g. Nordrhein-Westfalen from 2019 onwards. Importantly, the data includes the geographic coordinates of each accident, allowing for spatial analysis. We will focus on accidents that occurred in Frankfurt am Main. To analyze the spatial distribution of accidents, we will employ point pattern analysis techniques as described by Rey et al.[3] This involves mapping the locations of accidents and identifying clusters or hotspots using Density-Based Spatial Clustering of Applications, or DBSCAN\@. Additionally, we will categorize accidents based on the type of participants involved (e.g., pedestrians, cyclists, motor vehicle occupants) to see if different patterns emerge for different groups.
 
 \section*{Results}
 % Key findings and insights (up to ~2000 chars)
 % Multiple figures can be added as links / references. 
-% My recommendation is to only add maximally one figure directly in the PDF.
+
+
+
+
+\lipsum[1]\\
+\lipsum[2]\\
 
 %% References
 \section*{References}
@@ -68,6 +77,7 @@ Traffic accidents are a major public health concern. Every year in Germany there
     \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
     \item Sergio J. Rey, Dani Arribas-Bel, Levi J. Wolf, ``Point Pattern Analysis'', 2020. [Online]. Available: \url{https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html}. [Accessed October 26, 2025]
     \item ``Data license Germany---Attribution---Version 2.0''. [Online]. Available: \url{http://www.govdata.de/dl-de/by-2-0}. [Accessed October 26, 2025] % chktex 8
+    \item Statistisches Bundesamt (Destatis), ``Städte (Alle Gemeinden mit Stadtrecht) nach Fläche, Bevölkerung und Bevölkerungsdichte am 31.12.2024'', 2025. [Online]. Available: \url{https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/Administrativ/05-staedte.html}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
 %% Code
@@ -81,6 +91,7 @@ Traffic accidents are a major public health concern. Every year in Germany there
 \begin{enumerate}[label={[\arabic*]},start=6]
     % add more items as needed
     \item ``OpenGeodata.NRW''. [Online]. Available: \url{https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/}. [Accessed October 26, 2025]
+    \item ``OpenStreetMap''. [Online]. Available: \url{https://www.openstreetmap.org/copyright}.
 \end{enumerate}
 
 %% Protocols
