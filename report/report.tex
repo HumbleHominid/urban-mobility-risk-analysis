@@ -54,8 +54,8 @@
 Traffic accidents are a major public health concern. There is an average of 2,500,000 traffic accidents in Germany every year.[1] Of those accidents, roughly 11\% or, one in nine, results in personal injury.[1][2] Figure 1 shows the traffic accidents with personal injury in Germany for the year 2024. In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This paper maps and analyzes the distribution of such accidents in Frankfurt am Main.
 
 \section*{Data \& Methods}
-We will analyze data obtained from Unfallatlas which contains records of accidents with personal injury in Germany. We have access to data from 2016 but, some states are not included until later years e.g. Nordrhein-Westfalen from 2019 onwards. Importantly, the data includes the geographic coordinates of each accident, allowing for spatial analysis. However, we do not have a record of \textit{all} accidents with personal injury. As part of the aggregation and data cleaning process, Unfallatlas excluded data points where the geolocation could not be confirmed or did not make sense.[3]\\
-\par
+We will analyze data obtained from Unfallatlas which contains records of accidents with personal injury in Germany. We have access to data from 2016 but, some states are not included until later years e.g. Nordrhein-Westfalen from 2019 onwards. Importantly, the data includes the geographic coordinates of each accident, allowing for spatial analysis. However, we do not have a record of \textit{all} accidents with personal injury. As part of the aggregation and data cleaning process, Unfallatlas excluded data points where the geolocation could not be confirmed or did not make sense.[3]
+\medskip\par
 In this analysis, we will focus on accidents that occurred in Frankfurt am Main from 2016 to 2024. To analyze the spatial distribution of accidents, we will employ point pattern analysis techniques as described by Rey et al.[4] This involves mapping the locations of accidents and identifying clusters or hotspots using Density-Based Spatial Clustering of Applications, or DBSCAN\@. Additionally, we will categorize accidents based on the type of participants involved (e.g., pedestrians, cyclists, motor vehicle occupants) to see if different patterns emerge for different groups.
 
 % Key findings and insights (up to ~2000 chars)
@@ -69,13 +69,13 @@ In this analysis, we will focus on accidents that occurred in Frankfurt am Main 
     \vspace{-10pt}
 \end{wrapfigure}
 
-Every year in Frankfurt, there are approximately 2,500 accidents with personal injury. Figure 2 shows the traffic accidents with personal injury in Frankfurt from 2016 to 2024. In total, there were 22,500 accidents with personal injury. By visual inspection, one can predict where the hotspots are located. The city center and major roads appear to have a higher density of accidents. To confirm this we will apply DBSCAN to identify clustering.\\
-\par
-When using DBSCAN there are two key parameters to tune, the distance to consider when computing core nodes, \(\varepsilon{}\), and the minimum samples, \(m\). For our purposes, we chose an \(\varepsilon{}\) of 100 meters. When choosing a value for \(m\), we would select different values depending on the sample set with the goal of narrowing our clustering down to 4--5. With this method \(m\) is in the range of 20 to 85.\\
-\par
-By using DBSCAN clustering, we identified several hotspots for traffic accidents with personal injury. One of the identified hotspots is located near the Hauptbahnhof (main train station) area, which is a busy intersection with high pedestrian and vehicle traffic. Another hotspot is found along the A661 highway. The remaining two hotspots are located at the intersections of Adickasallee and Eckenheimer Landstraße, near Frankfurt School, and Hügelstraße and Eschersheimer Landstraße, in Dornbush.\\
-\par
-When categorizing accidents based on the type of participants involved, we observed distinct patterns. This implies that different types of road users face varying levels of risk depending on their location within the city. For instance, while hotspots for all accident types include large intersections and major roads, cyclist accidents were more prevalent along the Main.\\
+Every year in Frankfurt, there are approximately 2,500 accidents with personal injury. Figure 2 shows the traffic accidents with personal injury in Frankfurt from 2016 to 2024. In total, there were 22,500 accidents with personal injury. By visual inspection, one can predict where the hotspots are located. The city center and major roads appear to have a higher density of accidents. To confirm this we will apply DBSCAN to identify clustering.
+\medskip\par
+When using DBSCAN there are two key parameters to tune, the distance to consider when computing core nodes, \(\varepsilon{}\), and the minimum samples, \(m\). For our purposes, we chose an \(\varepsilon{}\) of 100 meters. When choosing a value for \(m\), we selected different values depending on the sample set with the goal of narrowing our clustering down to 4--5 clusters. With this methodology \(m\) is in the range of 20 to 85 for our dataset.
+\medskip\par
+By using DBSCAN clustering, we identified several hotspots for traffic accidents with personal injury. One of the identified hotspots is located near the Hauptbahnhof (main train station) area, which is a busy intersection with high pedestrian and vehicle traffic. Another hotspot is found along the A661 highway. The remaining two hotspots are located at the intersections of Adickasallee and Eckenheimer Landstraße, near Frankfurt School, and Hügelstraße and Eschersheimer Landstraße, in Dornbush.
+\medskip\par
+When categorizing accidents based on the type of participants involved, we observed distinct patterns. This implies that different types of road users face varying levels of risk depending on their location within the city. For instance, while hotspots for all accident types include large intersections and major roads, cyclist accidents were more prevalent along the Main.
 
 \begin{figure}[h!]
     \centering
@@ -89,7 +89,7 @@ When categorizing accidents based on the type of participants involved, we obser
 In conclusion, the analysis of traffic accidents with personal injury in Frankfurt am Main from 2016 to 2024 reveals significant insights into the patterns and hotspots of such incidents. By employing DBSCAN clustering, we identified key areas where accidents are more likely to occur. The distinct patterns observed among different types of road users highlight the need for targeted interventions to improve safety for pedestrians, cyclists, and motor vehicle occupants. Further work could involve an on-the-ground analysis of the identified hotspots to understand the specific factors contributing to accidents in these areas.
 
 \section*{Acknowledgements}
-We would like to thank OpenGeodata.NRW for providing access to the Unfallatlas data, which was instrumental in conducting this analysis. We also acknowledge the Statistisches Bundesamt (Destatis) for their comprehensive data collection efforts. Maps were provided by OpenStreetMap. Additionally, we appreciate OpenAI providing access to ChatGPT which was used to assist in code generation during the analysis portion of this project.
+We would like to thank OpenGeodata.NRW for providing access to the Unfallatlas data, which was instrumental in conducting this analysis. We also acknowledge the Statistisches Bundesamt (Destatis) for their comprehensive data collection efforts. Maps were provided by OpenStreetMap. Additionally, we appreciate both OpenAI and Google for providing access to ChatGPT and Gemini which were used to assist in code generation during the analysis portion of this project.
 
 \newpage
 
@@ -106,13 +106,13 @@ We would like to thank OpenGeodata.NRW for providing access to the Unfallatlas d
 
 %% Code
 \section*{Code}
-\begin{enumerate}[label={[\arabic*]},start=6]
+\begin{enumerate}[label={[\arabic*]},start=7]
     \item Adrian Frings, Gaziza Janabayeva, Michael Fryer, ``Urban Mobility Risk Analysis'', 2025. [Online]. Available: \url{https://github.com/HumbleHominid/urban-mobility-risk-analysis}
 \end{enumerate}
 
 %% Data
 \section*{Data}
-\begin{enumerate}[label={[\arabic*]},start=7]
+\begin{enumerate}[label={[\arabic*]},start=8]
     % add more items as needed
     \item ``OpenGeodata.NRW''. [Online]. Available: \url{https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/}. [Accessed October 26, 2025]
     \item ``OpenStreetMap''. [Online]. Available: \url{https://www.openstreetmap.org/copyright}.
