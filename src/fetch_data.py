@@ -93,9 +93,9 @@ def get_df(year: int) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The dataframe for the specified year.
     """
-    assert (
-        year in DATA_YEARS
-    ), f"Year {year} not in available data years {list(DATA_YEARS)}"
+    assert year in DATA_YEARS, (
+        f"Year {year} not in available data years {list(DATA_YEARS)}"
+    )
 
     path = os.path.join(DATA_DIR, f"{year}.csv")
     df = pd.read_csv(  # type: ignore
@@ -163,9 +163,9 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
     Returns:
         dict[int, pd.DataFrame]: A dictionary mapping years to their dataframes.
     """
-    assert all(
-        year in DATA_YEARS for year in years
-    ), f"Some years not in available data years {list(DATA_YEARS)}"
+    assert all(year in DATA_YEARS for year in years), (
+        f"Some years not in available data years {list(DATA_YEARS)}"
+    )
     return {year: get_df(year) for year in years}
 
 
