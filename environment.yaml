@@ -13,3 +13,4 @@ dependencies:
   - vl-convert-python
   - contextily
   - manim
+  - scikit-learn
