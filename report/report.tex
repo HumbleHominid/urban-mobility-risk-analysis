@@ -6,6 +6,7 @@
 \usepackage{amsmath,amsfonts,amssymb}    % math symbols and fonts
 \usepackage{dcolumn}                     % align table columns on decimal point
 \usepackage[breaklinks=true,hidelinks,colorlinks=true,linkcolor=tabblue,citecolor=tabblue,urlcolor=tabblue]{hyperref}
+\usepackage{xurl}                       % let long URLs in the references break across lines
 \usepackage{enumitem}                    % control over lists
 \usepackage{wrapfig}                     % wrap text around figures
 
@@ -28,6 +29,7 @@
 % Line and paragraph spacing
 \setlength{\parindent}{0pt}
 \hfuzz=1pt
+\emergencystretch=1em          % avoid overfull lines in long references
 \vfuzz=1pt
 
 \begin{document}
@@ -47,14 +49,14 @@
     \vspace{0pt}
     \includegraphics[width=0.28\textwidth]{../output/figures/de-2024-bw.png}
     % label the figure for referencing
-    \caption{Traffic accidents with personal injury (2024).}
+    \caption{Traffic accidents with personal injury (2024).}\label{fig:germany}
     \vspace{-30pt}
 \end{wrapfigure}
 
-Traffic accidents are a major public health concern. There is an average of 2,500,000 traffic accidents in Germany every year [1]. Of those accidents, roughly 11\% or, one in nine, results in personal injury [1, 2]. Figure 1 shows the traffic accidents with personal injury in Germany for the year 2024. In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This paper maps and analyzes the distribution of such accidents in Frankfurt am Main.
+Traffic accidents are a major public health concern. There is an average of 2,500,000 traffic accidents in Germany every year [1]. Of those accidents, roughly 11\%, or one in nine, results in personal injury [1, 2]. Figure~\ref{fig:germany} shows the traffic accidents with personal injury in Germany for the year 2024. In which parts of a city are there hotspots for traffic accidents involving personal injury? Are these hotspots consistent when considering different categories of participants e.g.\ pedestrians, cyclists, or motor vehicle occupants? Understanding the spatial distribution of traffic accidents with personal injury in Frankfurt am Main can help identify high-risk areas and inform targeted interventions to improve road safety. This paper maps and analyzes the distribution of such accidents in Frankfurt am Main.
 
 \section*{Data \& Methods}
-We will analyze data obtained from Unfallatlas which contains records of accidents with personal injury in Germany. We have access to data from 2016 but, some states are not included until later years e.g. Nordrhein-Westfalen from 2019 onwards. Importantly, the data includes the geographic coordinates of each accident, allowing for spatial analysis. However, we do not have a record of \textit{all} accidents with personal injury. As part of the aggregation and data cleaning process, Unfallatlas excluded data points where the geolocation could not be confirmed or did not make sense [3].
+We will analyze data obtained from Unfallatlas [3] which contains records of accidents with personal injury in Germany. We have access to data from 2016 but some states are not included until later years e.g.\ Nordrhein-Westfalen from 2019 onwards. Importantly, the data includes the geographic coordinates of each accident, allowing for spatial analysis. However, we do not have a record of \textit{all} accidents with personal injury. As part of the aggregation and data cleaning process, Unfallatlas excluded data points where the geolocation could not be confirmed or did not make sense [3].
 \medskip\par
 In this analysis, we will focus on accidents that occurred in Frankfurt am Main from 2016 to 2024. To analyze the spatial distribution of accidents, we will employ point pattern analysis techniques as described by Rey et al. [4]. This involves mapping the locations of accidents and identifying clusters or hotspots using Density-Based Spatial Clustering of Applications, or DBSCAN\@. Additionally, we will categorize accidents based on the type of participants involved (e.g., pedestrians, cyclists, motor vehicle occupants) to see if different patterns emerge for different groups.
 
@@ -65,42 +67,42 @@ In this analysis, we will focus on accidents that occurred in Frankfurt am Main 
     \centering
     \vspace{-20pt}
     \includegraphics[width=0.28\textwidth]{../output/figures/ffm-2016-2024-bw.png} % chktex 8
-    \caption{Traffic accidents with personal injury in FFM (2016--2024).}
+    \caption{Traffic accidents with personal injury in FFM (2016--2024).}\label{fig:ffm}
     \vspace{-10pt}
 \end{wrapfigure}
 
-Every year in Frankfurt, there are approximately 2,500 accidents with personal injury. Figure 2 shows the traffic accidents with personal injury in Frankfurt from 2016 to 2024. In total, there were 22,500 accidents with personal injury. By visual inspection, one can predict where the hotspots are located. The city center and major roads appear to have a higher density of accidents. To confirm this we will apply DBSCAN to identify clustering.
+Every year in Frankfurt, there are approximately 2,500 accidents with personal injury. Figure~\ref{fig:ffm} shows the traffic accidents with personal injury in Frankfurt from 2016 to 2024. In total, there were 22,500 accidents with personal injury. By visual inspection, one can predict where the hotspots are located. The city center and major roads appear to have a higher density of accidents. To confirm this we will apply DBSCAN to identify clustering.
 \medskip\par
 When using DBSCAN there are two key parameters to tune, the distance to consider when computing core nodes, \(\varepsilon{}\), and the minimum samples, \(m\). For our purposes, we chose an \(\varepsilon{}\) of 100 meters. When choosing a value for \(m\), we selected different values depending on the sample set with the goal of narrowing our clustering down to 4--5 clusters. With this methodology \(m\) is in the range of 20 to 85 for our dataset.
 \medskip\par
 By using DBSCAN clustering, we identified several hotspots for traffic accidents with personal injury. One of the identified hotspots is located near the Hauptbahnhof (main train station) area, which is a busy intersection with high pedestrian and vehicle traffic. Another hotspot is found along the A661 highway. The remaining two hotspots are located at the intersections of Adickesallee and Eckenheimer Landstraße, near Frankfurt School, and Hügelstraße and Eschersheimer Landstraße, in Dornbusch.
 \medskip\par
-When categorizing accidents based on the type of participants involved, we observed distinct patterns. This implies that different types of road users face varying levels of risk depending on their location within the city. For instance, while hotspots for all accident types include large intersections and major roads, cyclist accidents were more prevalent along the Main.
+When categorizing accidents based on the type of participants involved, we observed distinct patterns (Figure~\ref{fig:clusters}). This implies that different types of road users face varying levels of risk depending on their location within the city. For instance, while hotspots for all accident types include large intersections and major roads, cyclist accidents were more prevalent along the Main.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.3\textwidth]{../output/figures/clusters_all_accidents.png}
     \includegraphics[width=0.3\textwidth]{../output/figures/clusters_pedestrians.png}
     \includegraphics[width=0.3\textwidth]{../output/figures/clusters_cyclists.png}
-    \caption{Traffic accidents with personal injury in Frankfurt am Main from 2016 to 2024: All accidents (left), Pedestrian-related accidents (center), Cyclist-related accidents (right).}
+    \caption{Traffic accidents with personal injury in Frankfurt am Main from 2016 to 2024: All accidents (left), Pedestrian-related accidents (center), Cyclist-related accidents (right).}\label{fig:clusters}
 \end{figure}
 
 \section*{Conclusion}
-In conclusion, the analysis of traffic accidents with personal injury in Frankfurt am Main from 2016 to 2024 reveals significant insights into the patterns and hotspots of such incidents. By employing DBSCAN clustering, we identified key areas where accidents are more likely to occur. The distinct patterns observed among different types of road users highlight the need for targeted interventions to improve safety for pedestrians, cyclists, and motor vehicle occupants. Further work could involve an on-the-ground analysis of the identified hotspots to understand the specific factors contributing to accidents in these areas.
+In conclusion, the analysis of traffic accidents with personal injury in Frankfurt am Main from 2016 to 2024 reveals significant insights into the patterns and hotspots of such incidents. By employing DBSCAN clustering, we identified key areas where accidents are more likely to occur. The distinct patterns observed among different types of road users highlight the need for targeted interventions to improve safety for pedestrians, cyclists, and motor vehicle occupants. The code for this analysis is available online [7]. Further work could involve an on-the-ground analysis of the identified hotspots to understand the specific factors contributing to accidents in these areas.
 
 \section*{Acknowledgements}
-We would like to thank OpenGeodata.NRW for providing access to the Unfallatlas data, which was instrumental in conducting this analysis. We also acknowledge the Statistisches Bundesamt (Destatis) for their comprehensive data collection efforts. Maps were provided by OpenStreetMap. Additionally, we appreciate both OpenAI and Google for providing access to ChatGPT and Gemini which were used to assist in code generation during the analysis portion of this project.
+We would like to thank OpenGeodata.NRW for providing access to the Unfallatlas data [8], which was instrumental in conducting this analysis. We also acknowledge the Statistisches Bundesamt (Destatis) for their comprehensive data collection efforts. Maps were provided by OpenStreetMap [9]. Additionally, we appreciate both OpenAI and Google for providing access to ChatGPT and Gemini which were used to assist in code generation during the analysis portion of this project.
 
 \newpage
 
 %% References
 \section*{References}
 \begin{enumerate}[label={[\arabic*]}]
-    \item Statistisches Bundesamt (Destatis), ``Accidents (recorded by the police): Germany, years, accident category, area'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0001}. [Accessed October 26, 2025] % chktex 8
-    \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://www-genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
-    \item ``Unfallatlas Deutschland'', 2025. [Online]. Available: \url{https://unfallatlas.statistikportal.de/}. [Accessed October 29, 2025] % chektex 8
+    \item Statistisches Bundesamt (Destatis), ``Accidents (recorded by the police): Germany, years, accident category, area'', 2025. [Online]. Available: \url{https://genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0001}. [Accessed October 26, 2025] % chktex 8
+    \item Statistisches Bundesamt (Destatis), ``Accidents involving personal injury, casualties: Germany, years, type of accident/kind of accident, area, severity of injury'', 2025. [Online]. Available: \url{https://genesis.destatis.de/datenbank/online/statistic/46241/table/46241-0005}. [Accessed October 26, 2025] % chktex 8
+    \item ``Unfallatlas Deutschland'', 2025. [Online]. Available: \url{https://unfallatlas.statistikportal.de/}. [Accessed October 29, 2025] % chktex 8
     \item Sergio J. Rey, Dani Arribas-Bel, Levi J. Wolf, ``Point Pattern Analysis'', 2020. [Online]. Available: \url{https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html}. [Accessed October 26, 2025]
-    \item ``Data license Germany---Attribution---Version 2.0''. [Online]. Available: \url{http://www.govdata.de/dl-de/by-2-0}. [Accessed October 26, 2025] % chktex 8
+    \item ``Data license Germany---Attribution---Version 2.0''. [Online]. Available: \url{https://www.govdata.de/dl-de/by-2-0}. [Accessed October 26, 2025] % chktex 8
     \item Statistisches Bundesamt (Destatis), ``Städte (Alle Gemeinden mit Stadtrecht) nach Fläche, Bevölkerung und Bevölkerungsdichte am 31.12.2024'', 2025. [Online]. Available: \url{https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/Administrativ/05-staedte.html}. [Accessed October 26, 2025] % chktex 8
 \end{enumerate}
 
