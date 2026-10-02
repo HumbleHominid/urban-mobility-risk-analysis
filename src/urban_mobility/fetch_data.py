@@ -5,7 +5,7 @@ import zipfile
 
 import pandas as pd
 
-from utils import cached_df, load_config, resolve_path
+from urban_mobility.utils import cached_df, load_config, resolve_path
 
 DATA_DIR = resolve_path(load_config().data.raw)
 DATA_YEARS = range(2016, 2025)

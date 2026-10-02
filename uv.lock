@@ -2366,7 +2366,7 @@ wheels = [
 [[package]]
 name = "urban-mobility-risk-analysis"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "contextily" },
     { name = "geopandas" },

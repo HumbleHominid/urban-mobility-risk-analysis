@@ -13,7 +13,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter, PercentFormatter
 
-from utils import load_config, resolve_path
+from urban_mobility.utils import load_config, resolve_path
 
 COLOR = "#494373"
 SEQUENTIAL = "ch:s=.25,rot=-.25"

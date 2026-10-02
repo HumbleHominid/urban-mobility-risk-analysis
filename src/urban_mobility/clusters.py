@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cluster import DBSCAN
 
-import plotting as pl
-from utils import cached_df
+from urban_mobility import plotting as pl
+from urban_mobility.utils import cached_df
 
 
 def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, breakdown=()):

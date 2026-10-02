@@ -15,8 +15,9 @@ Dependencies are managed with [uv](https://docs.astral.sh/uv/):
 uv sync        # create .venv from uv.lock
 ```
 
-Select `.venv` as the notebook kernel (`ipykernel` is included), or run scripts with
-`uv run python src/fetch_data.py`.
+The code in `src/urban_mobility` is installed into `.venv` (editable), so the notebooks in
+`notebooks/` import it with `from urban_mobility import ...`. Select `.venv` as the notebook kernel (`ipykernel` is included), or run scripts with
+`uv run python -m urban_mobility.fetch_data`.
 
-The `manim` animations (`src/manim.ipynb`) are optional and need system libraries
+The `manim` animations (`notebooks/manim.ipynb`) are optional and need system libraries
 (macOS: `brew install cairo pango pkg-config`), then `uv sync --group manim`.
