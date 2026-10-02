@@ -1,0 +1,12 @@
+data:
+  parent: "data"
+  raw: "${data.parent}/raw"
+  processed: "${data.parent}/processed"
+output:
+  parent: "output"
+  figures: "${output.parent}/figures"
+  media: "${output.parent}/media"
+  artifacts: "${output.parent}/artifacts"
+run:
+  # Recompute every cached artifact instead of loading it from output/artifacts
+  force_recompute: false

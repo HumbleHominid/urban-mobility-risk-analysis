@@ -5,12 +5,15 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 
 import plotting as pl
+from utils import cached_df
 
 
-def analyze_clusters(df, eps, min_samples, cluster_to_plot, breakdown=()):
+def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, breakdown=()):
     """DBSCAN on the metric coordinates, then print cluster centers, map the
     clusters and chart the accident types of one cluster.
 
+    The DBSCAN labels are cached as an artifact keyed on ``name``, ``eps`` and
+    ``min_samples`` (``name`` identifies the subset of accidents in ``df``).
     ``breakdown`` lists columns whose per-cluster value counts are printed.
     Returns the clustered (non-noise) rows, with a ``labels`` column.
     """
@@ -18,9 +21,18 @@ def analyze_clusters(df, eps, min_samples, cluster_to_plot, breakdown=()):
         print("Check Filter")
         return df
     df = df.copy()
-    df["labels"] = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(
-        df[["LINREFX", "LINREFY"]]
-    )
+
+    def compute() -> pd.DataFrame:
+        labels = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(
+            df[["LINREFX", "LINREFY"]]
+        )
+        return pd.DataFrame({"labels": labels})
+
+    key = f"clusters/{name}_eps{eps}_min{min_samples}"
+    labels = cached_df(key, compute)
+    if len(labels) != len(df):  # cached for different data
+        labels = cached_df(key, compute, force=True)
+    df["labels"] = labels["labels"].to_numpy()
     clusters_df = df[df["labels"] != -1]
     print(f"Found {clusters_df['labels'].nunique()} clusters.")
     if clusters_df.empty:

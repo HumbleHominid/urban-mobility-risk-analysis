@@ -2,7 +2,7 @@
 
 Importing this module applies the project theme. Every chart function takes an
 optional ``ax`` (so charts can be placed in ``plt.subplots`` grids), draws on it
-and returns it. Use ``save`` to write a figure to ``src/img``.
+and returns it. Use ``save`` to write a figure to ``output.figures`` (see configs/config.yaml).
 """
 
 import contextily as cx
@@ -13,7 +13,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter, PercentFormatter
 
-from utils import resolve_path
+from utils import load_config, resolve_path
 
 COLOR = "#494373"
 SEQUENTIAL = "ch:s=.25,rot=-.25"
@@ -59,8 +59,8 @@ def _label(ax, title=None, xlabel=None, ylabel=None):
 
 
 def save(fig, name: str, dpi=300, **kwargs) -> None:
-    """Write ``fig`` to src/img/<name>.png."""
-    path = resolve_path("src/img") / f"{name}.png"
+    """Write ``fig`` to <output.figures>/<name>.png."""
+    path = resolve_path(load_config().output.figures) / f"{name}.png"
     path.parent.mkdir(exist_ok=True)
     fig.savefig(path, dpi=dpi, bbox_inches="tight", **kwargs)
 
@@ -343,6 +343,6 @@ if __name__ == "__main__":
     )
     cluster_map(pts, rng.integers(-1, 3, 200), "clusters", basemap=False, ax=next(a))
     save(fig, "_smoke", dpi=50)
-    resolve_path("src/img/_smoke.png").unlink()
+    (resolve_path(load_config().output.figures) / "_smoke.png").unlink()
     plt.close(fig)
     print("ok")

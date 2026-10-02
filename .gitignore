@@ -12,13 +12,17 @@ report/*.gz
 
 *__pycache__/
 
-# Ignore files in src/data that are not pdf files
-src/data/[0-9]*.csv
+# Raw yearly accident CSVs are downloaded by src/fetch_data.py
+data/raw/[0-9]*.csv
 
-# Ignore everything in src/media that isn't in a subdirectory of src/media/videos
-src/media/*
-!src/media/videos/
-src/media/videos/**/partial_movie_files/
+# Ignore everything in output/media that isn't in a subdirectory of output/media/videos
+output/media/*
+!output/media/videos/
+output/media/videos/**/partial_movie_files/
+
+# Cached artifacts are rebuilt by utils.cached
+output/artifacts/*
+!output/artifacts/.gitkeep
 
 # Ignore MAC files
 *.DS_Store

@@ -1,12 +1,13 @@
+import hashlib
 import shutil
 import urllib.request
 import zipfile
 
 import pandas as pd
 
-from utils import resolve_path
+from utils import cached_df, load_config, resolve_path
 
-DATA_DIR = resolve_path("src/data")
+DATA_DIR = resolve_path(load_config().data.raw)
 DATA_YEARS = range(2016, 2025)
 DATA_URL_STUB = "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
 
@@ -41,7 +42,7 @@ def fetch_traffic_data():
 
 
 def get_df(year: int) -> pd.DataFrame:
-    """Get the dataframe for the specified year.
+    """Get the cleaned dataframe for the specified year, cached as an artifact.
     Args:
         year (int): The year to get the dataframe for.
     Returns:
@@ -50,6 +51,11 @@ def get_df(year: int) -> pd.DataFrame:
     assert (
         year in DATA_YEARS
     ), f"Year {year} not in available data years {list(DATA_YEARS)}"
+    return cached_df(f"accidents/{year}", lambda: _read_df(year))
+
+
+def _read_df(year: int) -> pd.DataFrame:
+    """Read and clean the raw CSV for ``year``."""
     df = pd.read_csv(  # type: ignore
         DATA_DIR / f"{year}.csv",
         sep=";",
@@ -111,6 +117,43 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
         dict[int, pd.DataFrame]: A dictionary mapping years to their dataframes.
     """
     return {year: get_df(year) for year in years}
+
+
+def get_city_aggregate(
+    years: list[int], by: list[str], aggs: dict[str, str]
+) -> pd.DataFrame:
+    """Aggregate accidents per ``by`` columns and join the result with the city info.
+
+    One-hot encodes injury severity (``inj_light/serious/fatal``) and lighting
+    (``daylight/twilight/darkness``) first, so ``aggs`` may sum those columns. Adds
+    ``inj_total``. Cached as an artifact keyed on the arguments, so changing ``years``,
+    ``by`` or ``aggs`` rebuilds it (set ``run.force_recompute`` after other changes).
+    """
+
+    def build() -> pd.DataFrame:
+        df = pd.concat(get_dfs(years).values(), ignore_index=True)
+        df = pd.get_dummies(df, columns=["UKATEGORIE"], prefix="inj", dtype=int)
+        df = pd.get_dummies(df, columns=["ULICHTVERH"], prefix="lum", dtype=int)
+        df = df.rename(
+            columns={
+                "inj_3": "inj_light",
+                "inj_2": "inj_serious",
+                "inj_1": "inj_fatal",
+                "lum_0": "daylight",
+                "lum_1": "twilight",
+                "lum_2": "darkness",
+            }
+        )
+        grouped = df.groupby(by).agg(aggs).reset_index()
+        grouped = grouped.rename(columns={"Community_key": "regional key"})
+        merged = grouped.merge(get_city_info(), on="regional key", how="inner")
+        merged["inj_total"] = (
+            merged["inj_light"] + merged["inj_serious"] + merged["inj_fatal"]
+        )
+        return merged
+
+    key = hashlib.md5(repr((years, by, sorted(aggs.items()))).encode()).hexdigest()[:8]
+    return cached_df(f"city_aggregate/{key}", build)
 
 
 def get_city_info() -> pd.DataFrame:
