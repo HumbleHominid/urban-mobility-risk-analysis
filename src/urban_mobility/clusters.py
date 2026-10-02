@@ -3,9 +3,18 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
 
 from urban_mobility import plotting as pl
 from urban_mobility.utils import cached_df
+
+
+def knn_distances(df, k):
+    """Distance of each point to its ``k``-th nearest neighbour (itself counts
+    as the 1st) on the metric coordinates, for choosing DBSCAN ``eps``."""
+    xy = df[["LINREFX", "LINREFY"]]
+    distances, _ = NearestNeighbors(n_neighbors=k).fit(xy).kneighbors(xy)
+    return distances[:, k - 1]
 
 
 def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, breakdown=()):

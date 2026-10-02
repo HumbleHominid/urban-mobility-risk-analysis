@@ -18,6 +18,32 @@ from urban_mobility.utils import load_config, resolve_path
 COLOR = "#494373"
 SEQUENTIAL = "ch:s=.25,rot=-.25"
 QUALITATIVE = "tab20"
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]  # UWOCHENTAG 1=Sunday
+
+# Human-readable labels; order matters (first 4 = injury categories, last 4 = types)
+MEASURE_LABELS = {
+    # injury category
+    "inj_total": "Total Injuries",
+    "inj_light": "Light Injuries",
+    "inj_serious": "Serious Injuries",
+    "inj_fatal": "Fatal Injuries",
+    # participant type
+    "IstFuss": "Pedestrian Accidents",
+    "IstRad": "Cyclist Accidents",
+    "IstKrad": "Motorcycle Accidents",
+    "IstGkfz": "Delivery Vehicle Accidents",
+}
+MEASURE_GROUPS = {
+    "categories": list(MEASURE_LABELS.items())[:4],
+    "types": list(MEASURE_LABELS.items())[4:],
+}
+
+# (lat, lon, color, label) of Frankfurt's centres
+FFM_CENTERS = [
+    (50.121250, 8.636583, "purple", "Geographical Center"),
+    (50.117306, 8.644417, "red", "Physical Center"),
+]
 BASEMAP = cx.providers.Esri.WorldGrayCanvas  # CartoDB tiles now need an API key
 
 
@@ -42,6 +68,16 @@ def apply_theme() -> None:
 apply_theme()
 
 thousands = FuncFormatter(lambda v, _: f"{v:,.0f}")
+
+
+def mean_centers(df, specs, lat="YGCSWGS84", lon="XGCSWGS84"):
+    """``(lat, lon, color, label)`` of the mean location of the rows where
+    ``df[col] == 1``, for each ``(col, color, label)`` in ``specs``."""
+    out = []
+    for col, color, label in specs:
+        sub = df[df[col] == 1]
+        out.append((sub[lat].mean(), sub[lon].mean(), color, f"Mean Center ({label})"))
+    return out
 
 
 def _ax(ax):

@@ -11,6 +11,16 @@ DATA_DIR = resolve_path(load_config().data.raw)
 DATA_YEARS = range(2016, 2025)
 DATA_URL_STUB = "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
 
+UTYP1_LABELS = {
+    1: "Driving accident",
+    2: "Accident caused by turning off the road",
+    3: "Accident caused by turning into a road or by crossing it",
+    4: "Accident caused by crossing the road",
+    5: "Accident involving stationary",
+    6: "Accident between vehicles moving along in carriageway",
+    7: "Other accident",
+}
+
 
 def fetch_traffic_data():
     """Fetch the traffic data from 2016-2024 if we don't have them already."""
@@ -117,6 +127,20 @@ def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
         dict[int, pd.DataFrame]: A dictionary mapping years to their dataframes.
     """
     return {year: get_df(year) for year in years}
+
+
+def get_city_accidents(
+    city: str = "Frankfurt am Main",
+    years=DATA_YEARS,
+    label_utyp1: bool = False,
+) -> pd.DataFrame:
+    """All accidents of ``city`` in ``years`` (rows in year order, original per-year
+    index kept). ``label_utyp1`` replaces the ``UTYP1`` codes with ``UTYP1_LABELS``."""
+    df = pd.concat(get_dfs(years).values())
+    df = df[df["Community_key"] == get_regional_key(get_city_info(), city)]
+    if label_utyp1:
+        df = df.assign(UTYP1=df["UTYP1"].map(UTYP1_LABELS))
+    return df
 
 
 def get_city_aggregate(
