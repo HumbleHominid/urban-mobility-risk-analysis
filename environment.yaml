@@ -6,13 +6,11 @@ dependencies:
   - numpy
   - matplotlib
   - pandas
-  - altair
   - geopandas
   - seaborn
   - ipykernel
-  - vl-convert-python
   - contextily
   - manim
   - scikit-learn
-  - plotly
+  - python-dotenv
   - omegaconf
