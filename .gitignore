@@ -21,3 +21,12 @@ src/media/videos/**/partial_movie_files/
 
 # Ignore MAC files
 *.DS_Store
+
+# Graphify
+graphify-out/
+*.ipynb.py
+*.ipynb.md
+*.ipynb.sql
+*.ipynb.sh
+*.ipynb.scala
+*.ipynb.r
