@@ -16,9 +16,9 @@ _CONFIG: DictConfig | None = None
 
 def repo_root() -> Path:
     for candidate in Path(__file__).resolve().parents:
-        if (candidate / "configs" / "config.yaml").exists():
+        if (candidate / "environment.yaml").exists():
             return candidate
-    raise FileNotFoundError("configs/config.yaml not found in any parent directory")
+    raise FileNotFoundError("environment.yaml not found in any parent directory")
 
 
 def resolve_path(value: str | Path) -> Path:
