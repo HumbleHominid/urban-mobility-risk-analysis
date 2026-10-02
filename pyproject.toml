@@ -1,0 +1,25 @@
+[project]
+name = "urban-mobility-risk-analysis"
+version = "0.1.0"
+description = "Analysis of traffic accidents in Frankfurt"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "contextily",
+    "geopandas",
+    "ipykernel",
+    "matplotlib",
+    "numpy",
+    "omegaconf",
+    "pandas",
+    "python-dotenv",
+    "scikit-learn",
+    "seaborn",
+]
+
+[dependency-groups]
+# Needs system libraries (macOS: brew install cairo pango pkg-config)
+manim = ["manim"]
+
+[tool.uv]
+package = false

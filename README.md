@@ -6,3 +6,17 @@ We seek to analyze traffic accidents in Frankfurt and attempt to answer the foll
   - Can we predict an uptick in traffic accidents in certain locations based on time of day and weather conditions?
 - How to reduce the risk of urban travel in Frankfurt with respect to road accidents?
 - Are certain types of road accidents more likely to occur depending on time and location?
+
+## Setup
+
+Dependencies are managed with [uv](https://docs.astral.sh/uv/):
+
+```sh
+uv sync        # create .venv from uv.lock
+```
+
+Select `.venv` as the notebook kernel (`ipykernel` is included), or run scripts with
+`uv run python src/fetch_data.py`.
+
+The `manim` animations (`src/manim.ipynb`) are optional and need system libraries
+(macOS: `brew install cairo pango pkg-config`), then `uv sync --group manim`.
