@@ -1,6 +1,7 @@
 """DBSCAN cluster analysis shared by the Frankfurt notebooks."""
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import NearestNeighbors
@@ -15,6 +16,22 @@ def knn_distances(df, k):
     xy = df[["LINREFX", "LINREFY"]]
     distances, _ = NearestNeighbors(n_neighbors=k).fit(xy).kneighbors(xy)
     return distances[:, k - 1]
+
+
+def dbscan_labels(df, eps, min_samples) -> np.ndarray:
+    """DBSCAN cluster label per row (-1 = noise) on the metric coordinates."""
+    return DBSCAN(eps=eps, min_samples=min_samples).fit_predict(df[["LINREFX", "LINREFY"]])
+
+
+def cluster_centers(clusters_df) -> pd.DataFrame:
+    """Mean location and a Google Maps link per cluster of the non-noise rows."""
+    centers = clusters_df.groupby("labels")[["YGCSWGS84", "XGCSWGS84"]].mean()
+    centers.columns = ["Latitude", "Longitude"]
+    centers["Google_Maps_Link"] = (
+        "https://www.google.com/maps/search/?api=1&query="
+        + centers["Latitude"].astype(str) + "," + centers["Longitude"].astype(str)
+    )
+    return centers
 
 
 def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, save_as=None):
@@ -32,10 +49,7 @@ def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, save_as=None):
     df = df.copy()
 
     def compute() -> pd.DataFrame:
-        labels = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(
-            df[["LINREFX", "LINREFY"]]
-        )
-        return pd.DataFrame({"labels": labels})
+        return pd.DataFrame({"labels": dbscan_labels(df, eps, min_samples)})
 
     key = f"clusters/{name}_eps{eps}_min{min_samples}"
     labels = cached_df(key, compute)
@@ -48,12 +62,7 @@ def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, save_as=None):
         print("No clusters found (only noise). Map and charts will not be generated.")
         return clusters_df
 
-    centers = clusters_df.groupby("labels")[["YGCSWGS84", "XGCSWGS84"]].mean()
-    centers.columns = ["Latitude", "Longitude"]
-    centers["Google_Maps_Link"] = (
-        "https://www.google.com/maps/search/?api=1&query="
-        + centers["Latitude"].astype(str) + "," + centers["Longitude"].astype(str)
-    )
+    centers = cluster_centers(clusters_df)
     pd.set_option("display.max_colwidth", None)
     print("Cluster Center Coordinates")
     print(centers)

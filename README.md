@@ -21,3 +21,15 @@ The code in `src/urban_mobility` is installed into `.venv` (editable), so the no
 
 The `manim` animations (`notebooks/manim.ipynb`) are optional and need system libraries
 (macOS: `brew install cairo pango pkg-config`), then `uv sync --group manim`.
+
+## Dashboard
+
+A Streamlit dashboard shows the DBSCAN accident hotspots in Frankfurt (with adjustable
+subset, years, ε and minimum samples), a Frankfurt overview and a short summary for Germany:
+
+```sh
+uv run streamlit run src/urban_mobility/dashboard.py
+```
+
+It embeds the rendered animations when they exist. The two made for it (how DBSCAN works,
+and the Frankfurt hotspots) are rendered with `uv run --group manim python -m urban_mobility.manim`.
