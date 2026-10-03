@@ -9,6 +9,10 @@ report/*.aux
 report/*.log
 report/*.out
 report/*.gz
+report/*.bbl
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
 
 *__pycache__/
 
