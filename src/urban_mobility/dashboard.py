@@ -80,23 +80,23 @@ def load_city() -> pd.DataFrame:
 
 
 @st.cache_data
-def city_population() -> int:
-    info = fd.get_city_info()
-    return int(info.loc[info["city"] == CITY, "population"].iat[0])
+def city_person_years(years: tuple[int, int]) -> int:
+    """The city's population summed over ``years`` (one year's population per year)."""
+    pop = fd.get_district_population()
+    pop = pop[(pop["district"] == fd.get_city_key(CITY)) & pop["UJAHR"].between(*years)]
+    return int(pop["population"].sum())
 
 
 @st.cache_data
 def load_germany() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Accidents per state and year (with the state's name and inhabitants), and
-    per year and severity."""
+    """Accidents per state and year (with the state's name and its population that
+    year), and per year and severity."""
     counts = shared()["data"][1]
-    states = pd.read_csv(resolve_path(f"{cfg.data.raw}/ULAND_Inhabitants.csv"), sep=";")
-    states["ULAND"] = states["ULAND"].astype(str).str.zfill(2)
     per_state = (
         counts.groupby(["ULAND", "UJAHR"])["accidents"]
         .sum()
         .reset_index()
-        .merge(states, on="ULAND")
+        .merge(fd.get_state_population(), on=["ULAND", "UJAHR"])
     )
     severity = counts.pivot_table(
         index="UJAHR", columns="UKATEGORIE", values="accidents", aggfunc="sum", fill_value=0
@@ -157,8 +157,8 @@ with st.sidebar:
         "lower it when you narrow the years.",
     )
 
-hotspots, overview, germany, method = st.tabs(
-    ["Hotspots", "Frankfurt overview", "Germany", "How DBSCAN works"]
+hotspots, overview, germany, method, acknowledgements = st.tabs(
+    ["Hotspots", "Frankfurt overview", "Germany", "How DBSCAN works", "Acknowledgements"]
 )
 
 with hotspots:
@@ -263,9 +263,9 @@ with overview:
     ffm = ffm[ffm["UJAHR"].between(*years)]
     n_years = ffm["UJAHR"].nunique()
     per_state, _ = load_germany()
-    # rows are state-years, so the summed inhabitants count each state once per year with data
-    de_rate = (per_state["accidents"].sum() / (per_state["INHABITANTS"]).sum()) * 1000
-    ffm_rate = len(ffm) / city_population() * 1000 / max(n_years, 1)
+    # rows are state-years: accidents over the population summed over the years with data
+    de_rate = (per_state["accidents"].sum() / per_state["population"].sum()) * 1000
+    ffm_rate = len(ffm) / city_person_years(years) * 1000
     c = st.columns(5)
     c[0].metric("Accidents", f"{len(ffm):,}")
     c[1].metric("Per year", f"{len(ffm) / max(n_years, 1):,.0f}")
@@ -322,15 +322,11 @@ with germany:
     c = st.columns(2)
     c[0].markdown("**Accidents per year (states reporting every year)**")
     c[0].bar_chart(per_state[full].groupby("UJAHR")["accidents"].sum())
-    rates = per_state.groupby("STATE").agg(
-        accidents=("accidents", "sum"),
-        years=("UJAHR", "nunique"),
-        inhabitants=("INHABITANTS", "first"),
-    )
+    rates = per_state.groupby("state")[["accidents", "population"]].sum()
     c[1].markdown("**Accidents per 1,000 inhabitants and year, by state**")
     c[1].bar_chart(
         (
-            rates["accidents"] / rates["inhabitants"] * 1000 / rates["years"]
+            rates["accidents"] / rates["population"] * 1000
         ).sort_values(),
         horizontal=True,
     )
@@ -362,3 +358,30 @@ with method:
             }
         )
         st.line_chart(dist, x_label="Accidents, sorted", y_label="Distance (m)")
+
+with acknowledgements:
+    # Same sources as the report (report/references.bib)
+    st.markdown(
+        """
+**Data.** Accidents with personal injury from the
+[Unfallatlas](https://unfallatlas.statistikportal.de/) of the Statistische Ämter des Bundes und
+der Länder, downloaded from [OpenGeodata.NRW](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)
+under the [Data licence Germany – attribution – version 2.0](https://www.govdata.de/dl-de/by-2-0).
+Populations of the states and districts on 31 December of each year: Statistisches Bundesamt
+(Destatis), GENESIS-Online, statistic [12411](https://genesis.destatis.de/datenbank/online/statistic/12411)
+(tables [12411-0010](https://genesis.destatis.de/datenbank/online/statistic/12411/table/12411-0010) for the states and
+[12411-0015](https://genesis.destatis.de/datenbank/online/statistic/12411/table/12411-0015) for the districts),
+under the same licence.
+
+**Maps.** Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+
+**Method.** Point pattern analysis following Rey, Arribas-Bel and Wolf,
+[*Geographic Data Science with Python*: Point Pattern Analysis](https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html).
+Clustering with [scikit-learn](https://scikit-learn.org/)'s DBSCAN, animations made with
+[Manim](https://www.manim.community/), dashboard built with [Streamlit](https://streamlit.io/).
+
+**Authors.** Adrian Frings, Gaziza Janabayeva and Michael Fryer. The code is on
+[GitHub](https://github.com/HumbleHominid/urban-mobility-risk-analysis).
+ChatGPT (OpenAI), Gemini (Google) and Claude (Anthropic) assisted with the code.
+"""
+    )

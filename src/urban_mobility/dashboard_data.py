@@ -26,7 +26,7 @@ def extract(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """The city's accidents (``UTYP1`` labelled) and the accidents per state, year
     and severity (``UKATEGORIE``). ``on_year(done, total, year)`` reports progress."""
-    key = fd.get_regional_key(fd.get_city_info(), CITY)
+    key = fd.get_city_key(CITY)
     cities, counts = [], []
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures = {pool.submit(fd.fetch_year, year): year for year in years}
@@ -35,7 +35,7 @@ def extract(
             future.result()  # re-raise a failed download
             df = fd._read_df(year)
             # reindex: some years lack a column (no IstGkfz in 2017)
-            cities.append(df.loc[df["Community_key"] == key].reindex(columns=CITY_COLUMNS))
+            cities.append(df.loc[df["District_key"] == key].reindex(columns=CITY_COLUMNS))
             counts.append(df.groupby(["ULAND", "UJAHR", "UKATEGORIE"]).size().rename("accidents").reset_index())
             if on_year:
                 on_year(done, len(years), year)
