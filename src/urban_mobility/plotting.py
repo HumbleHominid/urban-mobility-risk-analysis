@@ -47,25 +47,22 @@ FFM_CENTERS = [
 BASEMAP = cx.providers.Esri.WorldGrayCanvas  # CartoDB tiles now need an API key
 
 
-def apply_theme() -> None:
-    """Apply the project seaborn/matplotlib theme (called on import)."""
-    sns.set_theme(
-        context="notebook",
-        style="whitegrid",
-        palette=[COLOR],
-        rc={
-            "figure.figsize": (10, 5),
-            "figure.dpi": 100,
-            "axes.titlesize": 16,
-            "axes.titleweight": "bold",
-            "axes.labelsize": 13,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-        },
-    )
+# Project theme, applied on import
+sns.set_theme(
+    context="notebook",
+    style="whitegrid",
+    palette=[COLOR],
+    rc={
+        "figure.figsize": (10, 5),
+        "figure.dpi": 100,
+        "axes.titlesize": 16,
+        "axes.titleweight": "bold",
+        "axes.labelsize": 13,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+    },
+)
 
-
-apply_theme()
 
 thousands = FuncFormatter(lambda v, _: f"{v:,.0f}")
 
@@ -173,20 +170,6 @@ def stacked_bar(
     ax.grid(False)
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)
     return _label(ax, title, xlabel, ylabel)
-
-
-def heatmap(pivot: pd.DataFrame, title=None, fmt=".0f", ax=None):
-    """Annotated heatmap of a pivot table."""
-    ax = _ax(ax)
-    sns.heatmap(
-        pivot,
-        annot=True,
-        fmt=fmt,
-        cmap=sns.color_palette(SEQUENTIAL, as_cmap=True),
-        cbar=False,
-        ax=ax,
-    )
-    return _label(ax, title)
 
 
 def line_chart(df, x, y, title=None, xlabel=None, ylabel=None, hue=None, ax=None):
@@ -368,7 +351,6 @@ if __name__ == "__main__":
     bar_counts(counts, "bar gradient", gradient=True, ax=next(a))
     hbar(["a", "b"], [3, 5], "hbar", ax=next(a))
     stacked_bar(steps, "stacked", pct=True, ax=next(a))
-    heatmap(pd.DataFrame(rng.random((3, 4))), "heatmap", fmt=".2f", ax=next(a))
     line_chart(yearly, "x", "y", "line", ax=next(a))
     lorenz([0, 0.5, 1], [0, 0.2, 1], 0.3, "lorenz", "v", ax=next(a))
     scatter_fit(yearly, "x", "y", "fit", ax=next(a))

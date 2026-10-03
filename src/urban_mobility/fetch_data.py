@@ -83,9 +83,8 @@ def _read_df(year: int) -> pd.DataFrame:
     # Create a community key column. This is how we can identify cities
     df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
 
-    states = ["11", "02"]
-    for s in states:
-        df.loc[df["ULAND"] == s, "Community_key"] = f"{s}000000"
+    # City-states (Berlin, Hamburg) are one municipality each
+    df.loc[df["ULAND"].isin(["11", "02"]), "Community_key"] = df["ULAND"] + "000000"
 
     # We drop columns for identifiers that we don't care about for analysis
     df.drop(
@@ -113,7 +112,7 @@ def _read_df(year: int) -> pd.DataFrame:
     )
 
     # Create a unique id for the entry based on year and OID_
-    df["UID"] = df["OID_"].apply(lambda x: f"{year}_{x}")  # type: ignore
+    df["UID"] = f"{year}_" + df["OID_"].astype(str)
 
     return df
 
@@ -217,7 +216,3 @@ def get_regional_key(df: pd.DataFrame, city_name: str) -> str:
 
 if __name__ == "__main__":
     fetch_traffic_data()
-    df = get_df(2024)
-    city_info = get_city_info()
-    berlin_key = get_regional_key(city_info, "Berlin")
-    print(df[df["Community_key"] == berlin_key].head())

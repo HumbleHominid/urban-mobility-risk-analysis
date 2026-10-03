@@ -13,7 +13,6 @@ dependencies = [
     "omegaconf",
     "pandas",
     "pyarrow>=25.0.1",
-    "python-dotenv",
     "scikit-learn",
     "seaborn",
 ]

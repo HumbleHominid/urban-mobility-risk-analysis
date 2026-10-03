@@ -1,7 +1,6 @@
 data:
   parent: "data"
   raw: "${data.parent}/raw"
-  processed: "${data.parent}/processed"
 output:
   parent: "output"
   figures: "${output.parent}/figures"
