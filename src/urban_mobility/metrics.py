@@ -21,3 +21,36 @@ def calc_gini(df: pd.DataFrame, pop_label: str, val_label: str) -> float:
     """
     x, y = lorenz_points(df, pop_label, val_label)
     return 1 - 2 * np.trapezoid(x=x, y=y)
+
+
+# ULAND code -> state name
+STATES: dict[int, str] = {
+    1: "Schleswig-Holstein",
+    2: "Hamburg",
+    3: "Niedersachsen",  # data as from 2017
+    4: "Bremen",
+    5: "Nordrhein-Westfalen",  # data as from 2019
+    6: "Hessen",
+    7: "Rheinland-Pfalz",
+    8: "Baden-Württemberg",
+    9: "Bayern",
+    10: "Saarland",  # data as from 2017
+    11: "Berlin",  # data as from 2018
+    12: "Brandenburg",  # data as from 2017
+    13: "Mecklenburg-Vorpommern",  # data as from 2020
+    14: "Sachsen",
+    15: "Sachsen-Anhalt",  # data as from 2017
+    16: "Thüringen",  # data as from 2019
+}
+
+
+def gini_by_state(df: pd.DataFrame, val_label: str, pop_label: str = "population") -> pd.DataFrame:
+    """Gini index of ``val_label`` per state and year (columns Year, Land, Gini) from a
+    per-city aggregate with ``UJAHR`` and ``ULAND`` columns. State-years without data
+    are left out."""
+    return pd.DataFrame(
+        [
+            {"Year": year, "Land": STATES[int(land)], "Gini": calc_gini(g, pop_label, val_label)}
+            for (year, land), g in df.groupby(["UJAHR", "ULAND"])
+        ]
+    )
