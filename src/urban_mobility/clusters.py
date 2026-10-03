@@ -17,12 +17,13 @@ def knn_distances(df, k):
     return distances[:, k - 1]
 
 
-def analyze_clusters(df, name, eps, min_samples, cluster_to_plot):
+def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, save_as=None):
     """DBSCAN on the metric coordinates, then print cluster centers, map the
     clusters and chart the accident types of one cluster.
 
     The DBSCAN labels are cached as an artifact keyed on ``name``, ``eps`` and
     ``min_samples`` (``name`` identifies the subset of accidents in ``df``).
+    ``save_as`` also writes the cluster map to <output.figures>/<save_as>.png.
     Returns the clustered (non-noise) rows, with a ``labels`` column.
     """
     if df.empty:
@@ -59,6 +60,8 @@ def analyze_clusters(df, name, eps, min_samples, cluster_to_plot):
 
     fig, ax = plt.subplots(figsize=(10, 10), dpi=144)
     pl.cluster_map(df, df["labels"], pad=0.1, ax=ax)
+    if save_as:
+        pl.save(fig, save_as)
     plt.show()
 
     one = clusters_df[clusters_df["labels"] == cluster_to_plot]
