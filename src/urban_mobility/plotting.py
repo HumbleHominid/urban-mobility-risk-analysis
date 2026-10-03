@@ -2,7 +2,7 @@
 
 Importing this module applies the project theme. Every chart function takes an
 optional ``ax`` (so charts can be placed in ``plt.subplots`` grids), draws on it
-and returns it. Use ``save`` to write a figure to ``output.figures`` (see configs/config.yaml).
+and returns it. Use ``save`` to write a figure to ``output.figures`` (see configs/config.toml).
 """
 
 import contextily as cx

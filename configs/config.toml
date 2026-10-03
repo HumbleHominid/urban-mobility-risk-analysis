@@ -1,0 +1,11 @@
+[data]
+raw = "data/raw"
+
+[output]
+figures = "output/figures"
+media = "output/media"
+artifacts = "output/artifacts"
+
+[run]
+# Recompute every cached artifact instead of loading it from output/artifacts
+force_recompute = false

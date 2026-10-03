@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 import functools
+import tomllib
 from collections.abc import Callable
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
-
-from omegaconf import DictConfig, OmegaConf
 
 if TYPE_CHECKING:
     import pandas as pd
 
 
 def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").exists():
-            return candidate
-    raise FileNotFoundError("pyproject.toml not found in any parent directory")
+    return Path(__file__).resolve().parents[2]  # src/urban_mobility/utils.py
 
 
 def resolve_path(value: str | Path) -> Path:
@@ -23,15 +20,21 @@ def resolve_path(value: str | Path) -> Path:
     return path if path.is_absolute() else repo_root() / path
 
 
+def _namespace(d: dict) -> SimpleNamespace:
+    """Nested dicts -> attribute access (``cfg.output.figures``)."""
+    return SimpleNamespace(
+        **{k: _namespace(v) if isinstance(v, dict) else v for k, v in d.items()}
+    )
+
+
 @functools.cache
-def _read_config() -> DictConfig:
-    cfg = OmegaConf.load(repo_root() / "configs" / "config.yaml")
-    assert isinstance(cfg, DictConfig)
-    return cfg
+def _read_config() -> SimpleNamespace:
+    with open(repo_root() / "configs" / "config.toml", "rb") as f:
+        return _namespace(tomllib.load(f))
 
 
-def load_config(force_recompute: bool = False) -> DictConfig:
-    """Load ``configs/config.yaml`` once; ``force_recompute`` re-reads it from disk."""
+def load_config(force_recompute: bool = False) -> SimpleNamespace:
+    """Load ``configs/config.toml`` once; ``force_recompute`` re-reads it from disk."""
     if force_recompute:
         _read_config.cache_clear()
     return _read_config()

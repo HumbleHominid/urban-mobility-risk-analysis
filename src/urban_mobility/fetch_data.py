@@ -52,12 +52,7 @@ def fetch_traffic_data():
 
 
 def get_df(year: int) -> pd.DataFrame:
-    """Get the cleaned dataframe for the specified year, cached as an artifact.
-    Args:
-        year (int): The year to get the dataframe for.
-    Returns:
-        pd.DataFrame: The dataframe for the specified year.
-    """
+    """Cleaned accidents of ``year``, cached as an artifact."""
     assert (
         year in DATA_YEARS
     ), f"Year {year} not in available data years {list(DATA_YEARS)}"
@@ -118,13 +113,7 @@ def _read_df(year: int) -> pd.DataFrame:
 
 
 def get_dfs(years: list[int]) -> dict[int, pd.DataFrame]:
-    """Get the dataframes for the specified years.
-    Args:
-        years (list[int]): The years to get the dataframes for.
-
-    Returns:
-        dict[int, pd.DataFrame]: A dictionary mapping years to their dataframes.
-    """
+    """``{year: get_df(year)}`` for each of ``years``."""
     return {year: get_df(year) for year in years}
 
 
@@ -180,11 +169,7 @@ def get_city_aggregate(
 
 
 def get_city_info() -> pd.DataFrame:
-    """Fetches the city info from disk.
-
-    Returns:
-        pd.DataFrame: The city info as a Pandas dataframe
-    """
+    """City area, population and regional key, from ``city_info.csv``."""
     df = pd.read_csv(  # type: ignore
         DATA_DIR / "city_info.csv",
         sep=";",
@@ -201,17 +186,8 @@ def get_city_info() -> pd.DataFrame:
 
 
 def get_regional_key(df: pd.DataFrame, city_name: str) -> str:
-    """Fetches the regional key for the specified city from a dataframe.
-
-    Args:
-        df (pd.DataFrame): The dataframe containing city info.
-        city_name (str): The name of the city to get the regional key for.
-
-    Returns:
-        str: The regional key for the specified city.
-    """
-    city_info = df[df["city"] == city_name]
-    return city_info["regional key"].values[0]
+    """Regional key of ``city_name`` in the city info ``df``."""
+    return df.loc[df["city"] == city_name, "regional key"].iat[0]
 
 
 if __name__ == "__main__":
