@@ -31,5 +31,8 @@ subset, years, ε and minimum samples), a Frankfurt overview and a short summary
 uv run streamlit run src/urban_mobility/dashboard.py
 ```
 
+It downloads the accident data from the Unfallatlas on its first run (with a progress bar,
+about 100 MB, 6 s on a fast connection; instant locally once `data/raw` has the CSVs) and keeps it in memory.
+
 It embeds the rendered animations when they exist. The two made for it (how DBSCAN works,
 and the Frankfurt hotspots) are rendered with `uv run --group manim python -m urban_mobility.manim`.

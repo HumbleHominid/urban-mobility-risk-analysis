@@ -24,31 +24,33 @@ UTYP1_LABELS = {
 
 def fetch_traffic_data():
     """Fetch the traffic data for DATA_YEARS if we don't have them already."""
-    DATA_DIR.mkdir(exist_ok=True)
-
     for year in DATA_YEARS:
-        out_csv = DATA_DIR / f"{year}.csv"
-        if out_csv.exists():
-            print(f"Already have {out_csv.name}, skipping...")
-            continue
+        fetch_year(year)
 
-        title = f"Unfallorte{year}_EPSG25832_CSV.zip"
-        zip_path = DATA_DIR / title
-        extract_dir = DATA_DIR / str(year)
 
-        print(f"Fetching {title}...")
-        urllib.request.urlretrieve(f"{DATA_URL_STUB}{title}", zip_path)
-        try:
-            with zipfile.ZipFile(zip_path) as z:
-                z.extractall(extract_dir)
-            # Keep the extracted data file, named [year].csv
-            src = next(
-                p for p in extract_dir.rglob("*") if p.suffix in (".txt", ".csv")
-            )
-            src.rename(out_csv)
-        finally:
-            zip_path.unlink(missing_ok=True)
-            shutil.rmtree(extract_dir, ignore_errors=True)
+def fetch_year(year: int) -> None:
+    """Download the data of ``year`` to <data.raw>/<year>.csv unless it is there."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    out_csv = DATA_DIR / f"{year}.csv"
+    if out_csv.exists():
+        print(f"Already have {out_csv.name}, skipping...")
+        return
+
+    title = f"Unfallorte{year}_EPSG25832_CSV.zip"
+    zip_path = DATA_DIR / title
+    extract_dir = DATA_DIR / str(year)
+
+    print(f"Fetching {title}...")
+    urllib.request.urlretrieve(f"{DATA_URL_STUB}{title}", zip_path)
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            z.extractall(extract_dir)
+        # Keep the extracted data file, named [year].csv
+        src = next(p for p in extract_dir.rglob("*") if p.suffix in (".txt", ".csv"))
+        src.rename(out_csv)
+    finally:
+        zip_path.unlink(missing_ok=True)
+        shutil.rmtree(extract_dir, ignore_errors=True)
 
 
 def get_df(year: int) -> pd.DataFrame:

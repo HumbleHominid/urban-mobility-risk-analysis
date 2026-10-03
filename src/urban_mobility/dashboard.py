@@ -5,9 +5,14 @@ Run from the repo root:
 
     uv run streamlit run src/urban_mobility/dashboard.py
 
+The accident data is downloaded from the Unfallatlas on the first run (progress bar,
+about 100 MB, a few seconds) and then kept in memory for all sessions.
+
 The videos come from manim.ipynb and ``python -m urban_mobility.manim``; tabs
 show a hint instead when they have not been rendered.
 """
+
+import threading
 
 import matplotlib
 import pandas as pd
@@ -15,9 +20,9 @@ import streamlit as st
 
 from urban_mobility import fetch_data as fd
 from urban_mobility.clusters import cluster_centers, dbscan_labels, knn_distances
+from urban_mobility.dashboard_data import CITY, extract
 from urban_mobility.utils import load_config, resolve_path
 
-CITY = "Frankfurt am Main"
 YEARS = fd.DATA_YEARS
 cfg = load_config()
 VIDEOS = resolve_path(cfg.output.media) / "videos" / "720p30"
@@ -43,9 +48,35 @@ SUBSETS = {
 }
 
 
-@st.cache_data
+@st.cache_resource
+def shared() -> dict:
+    """One per server process, shared by all sessions: the loaded data, and a lock so
+    it is downloaded once. (The download runs outside st caches: they cannot replay
+    the progress bar updates.)"""
+    return {"lock": threading.Lock()}
+
+
+def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
+    state = shared()
+    if "data" not in state:
+        text = "Loading the accident data from the Unfallatlas…"
+        progress = st.progress(0.0, text=text)
+        try:
+            with state["lock"]:
+                if "data" not in state:  # another session may have loaded it meanwhile
+                    state["data"] = extract(
+                        YEARS,
+                        lambda done, total, year: progress.progress(
+                            done / total, text=f"{text} {year} done ({done}/{total})"
+                        ),
+                    )
+        finally:
+            progress.empty()
+    return state["data"]
+
+
 def load_city() -> pd.DataFrame:
-    return fd.get_city_accidents(CITY, YEARS, label_utyp1=True).reset_index(drop=True)
+    return shared()["data"][0]
 
 
 @st.cache_data
@@ -58,17 +89,18 @@ def city_population() -> int:
 def load_germany() -> tuple[pd.DataFrame, pd.DataFrame]:
     """Accidents per state and year (with the state's name and inhabitants), and
     per year and severity."""
-    df = pd.concat(fd.get_dfs(YEARS).values(), ignore_index=True)
+    counts = shared()["data"][1]
     states = pd.read_csv(resolve_path(f"{cfg.data.raw}/ULAND_Inhabitants.csv"), sep=";")
     states["ULAND"] = states["ULAND"].astype(str).str.zfill(2)
     per_state = (
-        df.groupby(["ULAND", "UJAHR"])
-        .size()
-        .rename("accidents")
+        counts.groupby(["ULAND", "UJAHR"])["accidents"]
+        .sum()
         .reset_index()
         .merge(states, on="ULAND")
     )
-    severity = df.groupby(["UJAHR", "UKATEGORIE"]).size().unstack(fill_value=0)
+    severity = counts.pivot_table(
+        index="UJAHR", columns="UKATEGORIE", values="accidents", aggfunc="sum", fill_value=0
+    )
     return per_state, severity
 
 
@@ -102,6 +134,12 @@ st.title("Accidents with Personal Injury in Frankfurt am Main")
 st.caption(
     f"Unfallatlas data, {YEARS[0]}–{YEARS[-1]}. Hotspots found with DBSCAN on the accident locations."
 )
+
+try:
+    load_data()
+except Exception as e:  # a download failed: say so instead of a traceback
+    st.error(f"Could not load the accident data from the Unfallatlas ({e}). Please reload the page to try again.")
+    st.stop()
 
 with st.sidebar:
     st.header("Frankfurt filters")
