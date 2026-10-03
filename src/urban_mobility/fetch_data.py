@@ -8,7 +8,7 @@ import pandas as pd
 from urban_mobility.utils import cached_df, load_config, resolve_path
 
 DATA_DIR = resolve_path(load_config().data.raw)
-DATA_YEARS = range(2016, 2025)
+DATA_YEARS = range(2016, 2026)
 DATA_URL_STUB = "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
 
 UTYP1_LABELS = {
@@ -23,7 +23,7 @@ UTYP1_LABELS = {
 
 
 def fetch_traffic_data():
-    """Fetch the traffic data from 2016-2024 if we don't have them already."""
+    """Fetch the traffic data for DATA_YEARS if we don't have them already."""
     DATA_DIR.mkdir(exist_ok=True)
 
     for year in DATA_YEARS:
@@ -75,6 +75,10 @@ def _read_df(year: int) -> pd.DataFrame:
         },
     )
 
+    # Zero-pad the codes (2021 drops the leading zeros of ULAND and UGEMEINDE)
+    for col, width in {"ULAND": 2, "UREGBEZ": 1, "UKREIS": 2, "UGEMEINDE": 3}.items():
+        df[col] = df[col].str.zfill(width)
+
     # Create a community key column. This is how we can identify cities
     df["Community_key"] = df["ULAND"] + df["UREGBEZ"] + df["UKREIS"] + df["UGEMEINDE"]
 
@@ -83,7 +87,8 @@ def _read_df(year: int) -> pd.DataFrame:
 
     # We drop columns for identifiers that we don't care about for analysis
     df.drop(
-        columns=["UIDENTSTLAE", "UIDENTSTLA", "FID", "PLST"],
+        # Object ids differ per year (OID_, OBJECTID, OBJECTID_1; none from 2025)
+        columns=["UIDENTSTLAE", "UIDENTSTLA", "FID", "PLST", "OID_", "OBJECTID", "OBJECTID_1"],
         errors="ignore",
         inplace=True,
     )
@@ -99,15 +104,9 @@ def _read_df(year: int) -> pd.DataFrame:
             "IstStrassenzustand": "USTRZUSTAND",
             # Light Condition
             "LICHT": "ULICHTVERH",
-            # IDs
-            "OBJECTID": "OID_",
-            "OBJECTID_1": "OID_",
         },
         inplace=True,
     )
-
-    # Create a unique id for the entry based on year and OID_
-    df["UID"] = f"{year}_" + df["OID_"].astype(str)
 
     return df
 
