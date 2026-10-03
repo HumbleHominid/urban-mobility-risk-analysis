@@ -171,7 +171,9 @@ def get_district_aggregate(
         )
         grouped = df.groupby(["District_key", "UJAHR"]).agg(aggs).reset_index()
         grouped = grouped.rename(columns={"District_key": "district"})
-        merged = grouped.merge(get_district_population(), on=["district", "UJAHR"], how="inner")
+        merged = grouped.merge(
+            get_district_population(), on=["district", "UJAHR"], how="inner"
+        )
         merged["inj_total"] = (
             merged["inj_light"] + merged["inj_serious"] + merged["inj_fatal"]
         )
@@ -198,14 +200,18 @@ def _read_population(file: str) -> pd.DataFrame:
 
 def get_state_population() -> pd.DataFrame:
     """Population per state (``ULAND``, ``state``) and year, from table 12411-0010."""
-    return _read_population("population_land.csv").rename(columns={"code": "ULAND", "label": "state"})
+    return _read_population("population_land.csv").rename(
+        columns={"code": "ULAND", "label": "state"}
+    )
 
 
 def get_district_population() -> pd.DataFrame:
     """Population per district (``district`` key, ``name``) and year, from table
     12411-0015. ``kreisfrei``
     marks the independent cities (kreisfreie Städte), the only cities with a row."""
-    df = _read_population("population_stadt.csv").rename(columns={"code": "district"})
+    df = _read_population("population_district.csv").rename(
+        columns={"code": "district"}
+    )
     label = df.pop("label").str.replace(r" \(until .*\)$", "", regex=True)
     df["kreisfrei"] = label.str.endswith(", kreisfreie Stadt")
     df["name"] = label.str.replace(r", (kreisfreie Stadt|Landkreis)$", "", regex=True)
