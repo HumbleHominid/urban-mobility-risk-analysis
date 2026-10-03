@@ -4,9 +4,5 @@
   "include": [
     "**/*.py",
     "**/*.ipynb"
-  ],
-  "exclude": [
-    "**/__pycache__",
-    "**/.*"
   ]
 }
