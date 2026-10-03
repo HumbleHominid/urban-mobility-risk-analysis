@@ -88,7 +88,15 @@ def _read_df(year: int) -> pd.DataFrame:
     # We drop columns for identifiers that we don't care about for analysis
     df.drop(
         # Object ids differ per year (OID_, OBJECTID, OBJECTID_1; none from 2025)
-        columns=["UIDENTSTLAE", "UIDENTSTLA", "FID", "PLST", "OID_", "OBJECTID", "OBJECTID_1"],
+        columns=[
+            "UIDENTSTLAE",
+            "UIDENTSTLA",
+            "FID",
+            "PLST",
+            "OID_",
+            "OBJECTID",
+            "OBJECTID_1",
+        ],
         errors="ignore",
         inplace=True,
     )
@@ -131,7 +139,7 @@ def get_city_accidents(
 
 
 def get_city_aggregate(
-    years: list[int], by: list[str], aggs: dict[str, str]
+    years: list[int] | range, by: list[str], aggs: dict[str, str]
 ) -> pd.DataFrame:
     """Aggregate accidents per ``by`` columns and join the result with the city info.
 
@@ -140,6 +148,8 @@ def get_city_aggregate(
     ``inj_total``. Cached as an artifact keyed on the arguments, so changing ``years``,
     ``by`` or ``aggs`` rebuilds it (set ``run.force_recompute`` after other changes).
     """
+    if type(years) is range:
+        years = list(years)
 
     def build() -> pd.DataFrame:
         df = pd.concat(get_dfs(years).values(), ignore_index=True)

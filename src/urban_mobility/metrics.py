@@ -47,10 +47,12 @@ STATES: dict[int, str] = {
 def gini_by_state(df: pd.DataFrame, val_label: str, pop_label: str = "population") -> pd.DataFrame:
     """Gini index of ``val_label`` per state and year (columns Year, Land, Gini) from a
     per-city aggregate with ``UJAHR`` and ``ULAND`` columns. State-years without data
-    are left out."""
+    are left out, and so are states with fewer than 3 cities (Berlin and Hamburg are
+    one city, Bremen two), where the index says nothing."""
     return pd.DataFrame(
         [
             {"Year": year, "Land": STATES[int(land)], "Gini": calc_gini(g, pop_label, val_label)}
             for (year, land), g in df.groupby(["UJAHR", "ULAND"])
+            if len(g) >= 3
         ]
     )
