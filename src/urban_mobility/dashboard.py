@@ -6,8 +6,9 @@ Run from the repo root:
 
     uv run streamlit run src/urban_mobility/dashboard.py
 
-The accident data is downloaded from the Unfallatlas on the first run (progress bar,
-about 100 MB, a few seconds) and then kept in memory for all sessions. The default
+The accident data is downloaded from the Unfallatlas and the municipality population
+from Destatis on the first run (progress bar, about 100 MB, a few seconds) and then
+kept in memory for all sessions. The default
 minimum accidents of an area are found on its first visit (progress bar, a few seconds
 for big cities) and kept as well.
 
@@ -70,16 +71,20 @@ def load_data() -> pd.DataFrame:
     state = shared()
     if "data" not in state:
         text = "Loading the accident data from the Unfallatlas…"
+        steps = len(YEARS) + 1  # the years, then the population
         progress = st.progress(0.0, text=text)
         try:
             with state["lock"]:
                 if "data" not in state:  # another session may have loaded it meanwhile
-                    state["data"] = extract(
+                    data = extract(
                         YEARS,
                         lambda done, total, year: progress.progress(
-                            done / total, text=f"{text} {year} done ({done}/{total})"
+                            done / steps, text=f"{text} {year} done ({done}/{total})"
                         ),
                     )
+                    progress.progress(len(YEARS) / steps, text="Loading the population data from Destatis…")
+                    fd.get_municipality_population()  # cached; the district and state tables are small local CSVs
+                    state["data"] = data
         finally:
             progress.empty()
     return state["data"]
@@ -236,7 +241,6 @@ st.caption(
 
 try:
     load_data()
-    fd.get_municipality_population()
 except Exception as e:  # a download failed: say so instead of a traceback
     st.error(f"Could not load the data ({e}). Please reload the page to try again.")
     st.stop()
