@@ -418,8 +418,9 @@ with germany:
         c[1].bar_chart(
             (
                 rates["accidents"] / rates["population"] * 1000
-            ).sort_values(),
+            ).sort_values(ascending=False),
             horizontal=True,
+            sort=False,
         )
         video(
             "PlotAccidents",
