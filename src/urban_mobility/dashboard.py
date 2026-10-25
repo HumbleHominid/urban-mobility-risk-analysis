@@ -1,5 +1,5 @@
 """Streamlit dashboard: DBSCAN hotspots of accidents with personal injury in any
-German district, with an overview of the district, a short summary for Germany and
+German district or municipality, with an overview of the area, a short summary for Germany and
 the Frankfurt case study the project started with.
 
 Run from the repo root:
@@ -8,7 +8,7 @@ Run from the repo root:
 
 The accident data is downloaded from the Unfallatlas on the first run (progress bar,
 about 100 MB, a few seconds) and then kept in memory for all sessions. The default
-minimum accidents of a district are found on its first visit (progress bar, a few seconds
+minimum accidents of an area are found on its first visit (progress bar, a few seconds
 for big cities) and kept as well.
 
 The videos come from manim.ipynb and ``python -m urban_mobility.manim``; tabs
@@ -61,7 +61,7 @@ SUBSETS = {
 @st.cache_resource
 def shared() -> dict:
     """One per server process, shared by all sessions: the loaded data, the tuned
-    minimum samples per district, and locks so each is computed once. (This runs
+    minimum samples per area, and locks so each is computed once. (This runs
     outside st caches: they cannot replay the progress bar updates.)"""
     return {"lock": threading.Lock(), "tune_lock": threading.Lock()}
 
@@ -86,43 +86,66 @@ def load_data() -> pd.DataFrame:
 
 
 @st.cache_data
-def district_labels() -> dict[str, str]:
-    """District key -> "Frankfurt am Main (city)" / "Offenbach (district)", by name."""
+def area_labels() -> dict[str, dict[str, str]]:
+    """Area key -> name, by name, per picker: "City" holds the kreisfreie cities
+    (5-digit key) and the municipalities with at least 50 accidents (8-digit key),
+    "District" the other districts. A municipality sharing its name with another
+    city gets its district added ("Münster (Darmstadt-Dieburg)")."""
     pop = fd.get_district_population().sort_values("UJAHR").drop_duplicates("district", keep="last")
-    pop["label"] = pop["name"] + pop["kreisfrei"].map({True: " (city)", False: " (district)"})
-    return pop.sort_values("name").set_index("district")["label"].to_dict()
+    groups = {"City": {}, "District": {}}
+    for key, name, kreisfrei in zip(pop["district"], pop["name"], pop["kreisfrei"]):
+        groups["City" if kreisfrei else "District"][key] = name
+    names = pop.set_index("district")["name"]
+    counts = shared()["data"].groupby(["District_key", "UGEMEINDE"], observed=True).size()
+    big = {f"{d}{g:03d}" for (d, g), n in counts.items() if n >= 50}
+    mun = fd.get_municipality_population()
+    # 61/62: kreisfreie cities, already districts; 65/66: unincorporated areas (no inhabitants)
+    mun = mun[(mun["UJAHR"] == mun["UJAHR"].max()) & ~mun["kind"].isin([61, 62, 65, 66])]
+    cities = groups["City"]
+    cities |= {key: name for key, name in zip(mun["municipality"], mun["name"]) if key in big}
+    shared_name = pd.Series(cities).duplicated(keep=False)
+    for key in shared_name[shared_name].index:
+        if len(key) == 8:
+            cities[key] += f" ({names.get(key[:5], key[:5])})"
+    return {g: dict(sorted(labels.items(), key=lambda item: item[1])) for g, labels in groups.items()}
+
+
+def area_mask(area: str) -> pd.Series:
+    """Mask of the raw accidents of a district (5-digit key) or municipality (8-digit)."""
+    df = shared()["data"]
+    mask = df["District_key"] == area[:5]
+    return mask & (df["UGEMEINDE"] == int(area[5:])) if len(area) == 8 else mask
 
 
 @st.cache_resource(max_entries=50)  # not copied per call like st.cache_data; callers don't mutate it
-def district_accidents(district: str) -> pd.DataFrame:
-    """The district's accidents (by ``District_key``) without the location outliers."""
-    df = shared()["data"]
-    df = df[df["District_key"] == district]
+def area_accidents(area: str) -> pd.DataFrame:
+    """The area's accidents without the location outliers."""
+    df = shared()["data"][area_mask(area)]
     return df[~location_outliers(df)]
 
 
-def n_location_outliers(district: str) -> int:
-    return int((shared()["data"]["District_key"] == district).sum()) - len(district_accidents(district))
+def n_location_outliers(area: str) -> int:
+    return int(area_mask(area).sum()) - len(area_accidents(area))
 
 
-def subset_accidents(district: str, subset: str, years: tuple[int, int]) -> pd.DataFrame:
-    df = district_accidents(district)
+def subset_accidents(area: str, subset: str, years: tuple[int, int]) -> pd.DataFrame:
+    df = area_accidents(area)
     return SUBSETS[subset](df[df["UJAHR"].between(*years)])
 
 
-def tuned_min_samples(district: str) -> dict[str, int]:
+def tuned_min_samples(area: str) -> dict[str, int]:
     """Default minimum samples per subset: the smallest leaving at most 5 hotspots over
-    all years with ε = 100 m. Computed on the district's first visit, then kept."""
+    all years with ε = 100 m. Computed on the area's first visit, then kept."""
     state = shared()
-    key = f"tuned_{district}"
+    key = f"tuned_{area}"
     if key not in state:
-        name = district_labels()[district]
+        name = (area_labels()["City"] | area_labels()["District"])[area]
         text = f"Finding the hotspot settings for {name}…"
         progress = st.progress(0.0, text=text)
         try:
             with state["tune_lock"]:
                 if key not in state:  # another session may have tuned it meanwhile
-                    frames = {s: f(district_accidents(district)) for s, f in SUBSETS.items()}
+                    frames = {s: f(area_accidents(area)) for s, f in SUBSETS.items()}
                     sizes = sum(len(f) for f in frames.values())
                     work = {"done": 0, "start": time.time()}
 
@@ -145,11 +168,15 @@ def tuned_min_samples(district: str) -> dict[str, int]:
 
 
 @st.cache_data
-def district_person_years(district: str, years: tuple[int, ...]) -> int:
-    """The district's population summed over ``years`` (one year's population per year)."""
-    pop = fd.get_district_population()
-    pop = pop[(pop["district"] == district) & pop["UJAHR"].isin(years)]
-    return int(pop["population"].sum())
+def area_person_years(area: str, years: tuple[int, ...]) -> pd.Series:
+    """The area's population per year in ``years`` (years without a row are missing)."""
+    pop, col = (
+        (fd.get_district_population(), "district")
+        if len(area) == 5
+        else (fd.get_municipality_population(), "municipality")
+    )
+    pop = pop[(pop[col] == area) & pop["UJAHR"].isin(years)]
+    return pop.set_index("UJAHR")["population"]
 
 
 @st.cache_data
@@ -178,10 +205,10 @@ def load_germany() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 @st.cache_data(max_entries=32)
 def clustered(
-    district: str, subset: str, years: tuple[int, int], eps: int, min_samples: int
+    area: str, subset: str, years: tuple[int, int], eps: int, min_samples: int
 ) -> pd.DataFrame:
     """Accidents of ``subset`` in ``years`` with their DBSCAN ``labels``."""
-    df = subset_accidents(district, subset, years)
+    df = subset_accidents(area, subset, years)
     labels = dbscan_labels(df, eps, min_samples) if len(df) else np.empty(0, dtype=int)
     return df.assign(labels=labels)
 
@@ -209,20 +236,28 @@ st.caption(
 
 try:
     load_data()
+    fd.get_municipality_population()
 except Exception as e:  # a download failed: say so instead of a traceback
-    st.error(f"Could not load the accident data from the Unfallatlas ({e}). Please reload the page to try again.")
+    st.error(f"Could not load the data ({e}). Please reload the page to try again.")
     st.stop()
 
-labels = district_labels()
+groups = area_labels()
+labels = groups["City"] | groups["District"]
 with st.sidebar:
     st.header("Filters")
-    district = st.selectbox(
-        "District",
-        list(labels),
-        index=list(labels).index(fd.get_city_key("Frankfurt am Main")),
-        format_func=labels.get,
+    left, right = st.columns([1, 2], vertical_alignment="center")
+    kind = left.radio("Area", list(groups), label_visibility="collapsed")
+    options = groups[kind]
+    # each picker's choice, kept here: Streamlit drops a widget's state while it is hidden
+    picked = st.session_state.setdefault(
+        "picked", {"City": fd.get_city_key("Frankfurt am Main"), "District": next(iter(groups["District"]))}
     )
-tuned = tuned_min_samples(district)  # outside the sidebar: the progress bar needs the width
+    if f"area_{kind}" not in st.session_state:
+        st.session_state[f"area_{kind}"] = picked[kind]
+    area = picked[kind] = right.selectbox(
+        kind, list(options), format_func=options.get, key=f"area_{kind}", label_visibility="collapsed"
+    )
+tuned = tuned_min_samples(area)  # outside the sidebar: the progress bar needs the width
 with st.sidebar:
     years = st.slider("Years", YEARS[0], YEARS[-1], (YEARS[0], YEARS[-1]))
     subset = st.selectbox("Accidents", list(SUBSETS))
@@ -233,7 +268,7 @@ with st.sidebar:
         min_value=2,
         max_value=500,
         value=tuned[subset],
-        key=f"min_samples_{district}_{subset}",
+        key=f"min_samples_{area}_{subset}",
         help="Accidents within ε needed to start a hotspot. Defaults are the smallest number "
         "that leaves at most 5 hotspots over all years with ε = 100 m; lower it when you narrow the years.",
     )
@@ -247,7 +282,7 @@ hotspots, overview, germany, case_study, acknowledgements = tabs
 
 with hotspots:
     if hotspots.open:
-        df = clustered(district, subset, years, eps, int(min_samples))
+        df = clustered(area, subset, years, eps, int(min_samples))
         in_clusters = df[df["labels"] != -1]
         sizes = in_clusters["labels"].value_counts()
         c = st.columns(4)
@@ -277,8 +312,8 @@ with hotspots:
             )
             st.caption(
                 "Gray: accidents outside any hotspot (noise). Colors: one per hotspot, as in the table below. "
-                f"Left out in all tabs but Germany: {n_location_outliers(district)} accidents of {YEARS[0]}–{YEARS[-1]} "
-                "whose reported location is far from the rest of the district (fewer than 5 others within 5 km)."
+                f"Left out in all tabs but Germany: {n_location_outliers(area)} accidents of {YEARS[0]}–{YEARS[-1]} "
+                "whose reported location is far from the rest of the area (fewer than 5 others within 5 km)."
             )
 
         if sizes.empty:
@@ -349,16 +384,17 @@ with hotspots:
 
 with overview:
     if overview.open:
-        st.subheader(labels[district])
-        local = district_accidents(district)
+        st.subheader(labels[area])
+        local = area_accidents(area)
         local = local[local["UJAHR"].between(*years)]
         n_years = local["UJAHR"].nunique()
         per_state, _ = load_germany()
         # rows are state-years: accidents over the population summed over the years with
-        # data, for Germany and the district alike (not every state reports from 2016)
+        # data, for Germany and the area alike (not every state reports from 2016)
         de_rate = (per_state["accidents"].sum() / per_state["population"].sum()) * 1000
-        person_years = district_person_years(district, tuple(sorted(local["UJAHR"].unique())))
-        local_rate = len(local) / person_years * 1000 if person_years else None
+        population = area_person_years(area, tuple(sorted(local["UJAHR"].unique())))
+        # only years with accidents and a population row: else the rate is inflated
+        local_rate = local["UJAHR"].isin(population.index).sum() / population.sum() * 1000 if len(population) else None
         c = st.columns(5)
         c[0].metric("Accidents", f"{len(local):,}")
         c[1].metric("Per year", f"{len(local) / max(n_years, 1):,.0f}")
@@ -467,6 +503,10 @@ Populations of the states and districts on 31 December of each year: Statistisch
 (tables [12411-0010](https://genesis.destatis.de/datenbank/online/statistic/12411/table/12411-0010) for the states and
 [12411-0015](https://genesis.destatis.de/datenbank/online/statistic/12411/table/12411-0015) for the districts),
 under the same licence.
+Populations and names of the municipalities on 31 December of each year: Statistisches Bundesamt (Destatis),
+[Gemeindeverzeichnis](https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/_inhalt.html),
+annual editions GV100AD 2016–2025, reproduced with attribution as its terms allow.
+All data were processed: aggregated, filtered and joined with each other.
 
 **Maps.** Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 

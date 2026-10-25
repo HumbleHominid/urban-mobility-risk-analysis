@@ -1,3 +1,4 @@
+import functools
 import hashlib
 import shutil
 import urllib.request
@@ -9,6 +10,10 @@ from urban_mobility.utils import cached_df, load_config, resolve_path
 
 DATA_DIR = resolve_path(load_config().data.raw)
 DATA_YEARS = range(2016, 2026)
+GV100AD_URL_STUB = (
+    "https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/"
+    "Gemeindeverzeichnis/Administrativ/Archiv/GV100ADJ/"
+)
 DATA_URL_STUB = "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
 
 UTYP1_LABELS = {
@@ -222,6 +227,54 @@ def get_city_key(city: str) -> str:
     """District key of the independent city ``city`` (e.g. "Frankfurt am Main")."""
     df = get_district_population()
     return df.loc[df["kreisfrei"] & (df["name"] == city), "district"].iat[0]
+
+
+def fetch_municipalities(year: int) -> None:
+    """Download the Gemeindeverzeichnis GV100AD of ``year`` to
+    <data.raw>/gv100ad/<year>.zip unless it is there."""
+    path = DATA_DIR / "gv100ad" / f"{year}.zip"
+    if path.exists():
+        print(f"Already have gv100ad/{path.name}, skipping...")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    stem = f"GV100AD{'_' if year >= 2025 else ''}3112{year}"
+    print(f"Fetching {stem}.zip...")
+    part = path.with_suffix(".part")
+    urllib.request.urlretrieve(f"{GV100AD_URL_STUB}{stem}.zip?__blob=publicationFile", part)
+    zipfile.ZipFile(part).close()  # raise on a non-zip response instead of keeping it
+    part.rename(path)
+
+
+@functools.cache
+def get_municipality_population() -> pd.DataFrame:
+    """Population per municipality (``municipality`` key, ``name``, Textkennzeichen
+    ``kind``) and year, from the Destatis Gemeindeverzeichnis GV100AD (Gebietsstand
+    31 December). Each year keeps that year's municipality keys."""
+    rows = []
+    for year in DATA_YEARS:
+        fetch_municipalities(year)
+        with zipfile.ZipFile(DATA_DIR / "gv100ad" / f"{year}.zip") as z:
+            (member,) = [
+                n
+                for n in z.namelist()
+                if not n.lower().endswith(".pdf") and n != "Hinweise.txt"
+            ]
+            raw = z.read(member)
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            text = raw.decode("latin-1")
+        for line in text.splitlines():
+            if line.startswith("60"):  # Satzart 60: municipality
+                ags, kind, pop = line[10:18], line[122:124], line[139:150]
+                assert (ags + kind + pop.strip()).isdigit(), line
+                name = line[22:72].split(",")[0].strip()  # "Steinfurt, Stadt" -> "Steinfurt"
+                rows.append((ags, name, int(kind), year, int(pop)))
+    df = pd.DataFrame(
+        rows, columns=["municipality", "name", "kind", "UJAHR", "population"]
+    )
+    assert not df.duplicated(["municipality", "UJAHR"]).any()
+    return df
 
 
 if __name__ == "__main__":

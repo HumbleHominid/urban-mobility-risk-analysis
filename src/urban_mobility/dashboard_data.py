@@ -18,7 +18,7 @@ UTYP1_TYPE = pd.CategoricalDtype(list(fd.UTYP1_LABELS.values()))
 ACCIDENT_COLUMNS = [
     "UJAHR", "USTUNDE", "UWOCHENTAG", "UKATEGORIE", "ULICHTVERH", "UTYP1",
     "IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige",
-    "LINREFX", "LINREFY", "XGCSWGS84", "YGCSWGS84", "District_key",
+    "LINREFX", "LINREFY", "XGCSWGS84", "YGCSWGS84", "District_key", "UGEMEINDE",
 ]
 COORDINATES = ["LINREFX", "LINREFY", "XGCSWGS84", "YGCSWGS84"]
 

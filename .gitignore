@@ -19,6 +19,9 @@ report/*.fls
 # Raw yearly accident CSVs are downloaded by src/fetch_data.py
 data/raw/[0-9]*.csv
 
+# Gemeindeverzeichnis zips are downloaded by fetch_data
+data/raw/gv100ad/
+
 # Ignore everything in output/media that isn't in a subdirectory of output/media/videos
 output/media/*
 !output/media/videos/
