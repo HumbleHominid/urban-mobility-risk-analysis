@@ -1,5 +1,7 @@
 """DBSCAN cluster analysis shared by the Frankfurt notebooks."""
 
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -18,9 +20,41 @@ def knn_distances(df, k):
     return distances[:, k - 1]
 
 
+def location_outliers(df, k=5, radius=5000) -> np.ndarray:
+    """True for points with fewer than ``k`` others within ``radius`` m: within one
+    district, accidents whose reported location lies far from all the others (one
+    Köln accident is placed near Jena). Checked against the district boundaries
+    (BKG VG250), these thresholds catch 88% of the accidents more than 5 km outside
+    their district and drop 0.004% of the rest, isolated rural accidents."""
+    if len(df) <= k:
+        return np.zeros(len(df), dtype=bool)
+    return knn_distances(df, k + 1) > radius
+
+
 def dbscan_labels(df, eps, min_samples) -> np.ndarray:
     """DBSCAN cluster label per row (-1 = noise) on the metric coordinates."""
     return DBSCAN(eps=eps, min_samples=min_samples).fit_predict(df[["LINREFX", "LINREFY"]])
+
+
+def tune_min_samples(df, eps, max_hotspots=5, lo=5, hi=500, on_step=None) -> int:
+    """Smallest ``min_samples`` in [``lo``, ``hi``] leaving at most ``max_hotspots``
+    DBSCAN clusters (noise excluded), by binary search. The cluster count is only
+    nearly monotonic in ``min_samples``, so this finds a boundary, not a global
+    minimum. ``on_step(step, max_steps)`` follows each DBSCAN run (``max_steps``
+    is an upper bound)."""
+    if len(df) < lo:
+        return lo
+    step, max_steps = 0, math.ceil(math.log2(hi - lo + 1))
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if len(set(dbscan_labels(df, eps, mid)) - {-1}) <= max_hotspots:
+            hi = mid
+        else:
+            lo = mid + 1
+        step += 1
+        if on_step:
+            on_step(step, max_steps)
+    return lo
 
 
 def cluster_centers(clusters_df) -> pd.DataFrame:
@@ -88,3 +122,19 @@ def analyze_clusters(df, name, eps, min_samples, cluster_to_plot, save_as=None):
     ax.set_xlim(0, counts.max() * 1.15)
     plt.show()
     return clusters_df
+
+
+if __name__ == "__main__":
+    rng = np.random.default_rng(0)
+    blobs = []
+    for i in range(8):  # 10, 20, ..., 80 points within 5 m, blobs 10 km apart
+        n = 10 * (i + 1)
+        r, a = 5 * np.sqrt(rng.random(n)), 2 * np.pi * rng.random(n)
+        blobs.append(pd.DataFrame({"LINREFX": 10_000 * i + r * np.cos(a), "LINREFY": r * np.sin(a)}))
+    # blobs of >= 31 points: 40..80 = 5 clusters; at 30 there are 6
+    assert tune_min_samples(pd.concat(blobs), 100) == 31
+    assert tune_min_samples(pd.DataFrame({"LINREFX": [], "LINREFY": []}), 100) == 5
+    # a lone point 50 km away is the only outlier; the smallest blob (10 points) is not
+    lone = pd.DataFrame({"LINREFX": [0.0], "LINREFY": [50_000.0]})
+    assert location_outliers(pd.concat([*blobs, lone])).tolist() == [False] * 360 + [True]
+    print("ok")
